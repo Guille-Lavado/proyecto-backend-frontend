@@ -3,11 +3,17 @@ sudo docker compose build
 sudo docker compose up -d
 sudo docker compose exec app composer global require laravel/installer
 
--- Modelos --
+-- Modelos y Migraciones --
 sudo docker compose exec app php artisan make:model Ciclista -m
 sudo docker compose exec app php artisan make:model Plan_entrenamiento -m
 sudo docker compose exec app php artisan make:model tipos_componente -m
 sudo docker compose exec app php artisan make:model Bloques_entrenamiento -m
+sudo docker compose exec app php artisan make:model Historico_ciclista -m
+sudo docker compose exec app php artisan make:model Componentes_bicicleta -m
+sudo docker compose exec app php artisan make:model Bicicleta
+
+    -- Ejecutar Migraciones -- 
+    sudo docker compose exec app php artisan migrate
 
 -- Controladores --
 sudo docker compose exec app php artisan make:controller CiclistaController --resource
@@ -21,8 +27,5 @@ sudo docker compose exec app php artisan make:factory BloqueFactory --model=Bloq
 sudo docker compose exec app php artisan make:seeder CiclistaSeeder
 sudo docker compose exec app php artisan make:seeder BloqueSeeder
 
--- Ejecutar Seeders -- 
-sudo docker compose exec app php artisan db:seed
-
--- Ejecutar Migraciones -- 
-sudo docker compose exec app php artisan migrate
+    -- Ejecutar Seeders -- 
+    sudo docker compose exec app php artisan db:seed

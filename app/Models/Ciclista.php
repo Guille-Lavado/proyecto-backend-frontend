@@ -23,4 +23,8 @@ class Ciclista extends Model
     public function plan_entrenamiento() {
         return $this->hasMany(Plan_entrenamiento::class, "id_ciclista");
     }
+
+    public function historicos() {
+        return $this->hasMany(Historico_ciclista::class, 'id_ciclista');
+    }
 }
