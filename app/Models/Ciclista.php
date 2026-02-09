@@ -19,4 +19,8 @@ class Ciclista extends Model
     protected $dates = [
         'published_at',
     ];
+
+    public function plan_entrenamiento() {
+        return $this->hasMany(Plan_entrenamiento::class, "id_ciclista");
+    }
 }

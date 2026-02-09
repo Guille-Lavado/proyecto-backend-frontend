@@ -13,6 +13,7 @@ class CreateCiclistasTable extends Migration
      */
     public function up()
     {
+        // Tabla ciclistas
         Schema::create('ciclistas', function (Blueprint $table) {
             $table->id();
             $table->string("nombre");
@@ -22,7 +23,16 @@ class CreateCiclistasTable extends Migration
             $table->integer("peso_base");
             $table->integer("altura_base");
             $table->string("email");
-            $table->string("password");
+            $table->string("password", 60);
+        });
+
+        // Tabla bicicletas
+        Schema::create('bicicletas', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 100);
+            $table->string('tipo', 50);
+            $table->text('comentario')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -34,5 +44,6 @@ class CreateCiclistasTable extends Migration
     public function down()
     {
         Schema::dropIfExists('ciclistas');
+        Schema::dropIfExists('bicicletas');
     }
 }
