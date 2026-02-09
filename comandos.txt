@@ -1,0 +1,28 @@
+-- Crear Proyecto --
+sudo docker compose build
+sudo docker compose up -d
+sudo docker compose exec app composer global require laravel/installer
+
+-- Modelos --
+sudo docker compose exec app php artisan make:model Ciclista -m
+sudo docker compose exec app php artisan make:model Plan_entrenamiento -m
+sudo docker compose exec app php artisan make:model tipos_componente -m
+sudo docker compose exec app php artisan make:model Bloques_entrenamiento -m
+
+-- Controladores --
+sudo docker compose exec app php artisan make:controller CiclistaController --resource
+sudo docker compose exec app php artisan make:controller BloqueController --resource
+
+-- Factorias --
+sudo docker compose exec app php artisan make:factory CiclistaFactory --model=Ciclista
+sudo docker compose exec app php artisan make:factory BloqueFactory --model=Bloques_entrenamiento
+
+-- Seeders --
+sudo docker compose exec app php artisan make:seeder CiclistaSeeder
+sudo docker compose exec app php artisan make:seeder BloqueSeeder
+
+-- Ejecutar Seeders -- 
+sudo docker compose exec app php artisan db:seed
+
+-- Ejecutar Migraciones -- 
+sudo docker compose exec app php artisan migrate

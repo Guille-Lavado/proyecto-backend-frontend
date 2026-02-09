@@ -20,6 +20,6 @@ class Plan_entrenamiento extends Model
     ];
 
     public function ciclista() {
-        return $this->belongsTo(Ciclista::classs, "id_ciclista");
+        return $this->belongsTo(Ciclista::class, "id_ciclista");
     }
 }

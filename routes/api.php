@@ -14,4 +14,4 @@ use App\Http\Controllers\CiclistaController;
 |
 */
 
-Route::get('/ciclistas', [CiclistaController::class, 'listarCiclistasAPI'])->name('ciclistas.listarCiclistas');
+Route::get('/ciclista', [CiclistaController::class, 'listarCiclistasAPI'])->name('ciclista.listarCiclistas');

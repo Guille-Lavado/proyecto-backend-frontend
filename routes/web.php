@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\CiclistaController;
+use App\Http\Controllers\BloqueController;
 
 Route::get('/', function () {
   $visited = DB::select('select * from places where visited = ?', [1]); 
@@ -10,4 +11,5 @@ Route::get('/', function () {
   return view('travel_list', ['visited' => $visited, 'togo' => $togo ] );
 });
 
-Route::get('/ciclistas', [CiclistaController::class, 'index'])->name('ciclistas.index');
+Route::get('/ciclista', [CiclistaController::class, 'index'])->name('ciclista.index');
+Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ciclista;
+use App\Models\Bloques_entrenamiento;
 use Illuminate\Http\Request;
 
-class CiclistaController extends Controller
+class BloqueController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,7 @@ class CiclistaController extends Controller
      */
     public function index()
     {
-        return Ciclista::query()->orderBy('created_at', 'desc')->get();
+        return Bloques_entrenamiento::query()->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -81,11 +81,5 @@ class CiclistaController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    // listar todos los cicistas de la bd en formato json
-    public function listarCiclistasAPI(Ciclista $ciclista) {
-        $ciclista = Ciclista::query()->orderBy('created_at', 'desc')->get();
-        return response()->json($ciclista);
     }
 }
