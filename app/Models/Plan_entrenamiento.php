@@ -22,4 +22,8 @@ class Plan_entrenamiento extends Model
     public function ciclista() {
         return $this->belongsTo(Ciclista::class, "id_ciclista");
     }
+
+    public function sesiones() {
+        return $this->hasMany(SesionEntrenamiento::class, 'id_plan');
+    }
 }

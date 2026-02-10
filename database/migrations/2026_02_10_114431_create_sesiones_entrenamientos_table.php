@@ -18,7 +18,7 @@ class CreateSesionesEntrenamientosTable extends Migration
             $table->id();
 
             $table->unsignedBigInteger('id_plan');
-            $table->foreign('id_plan')->references('id')->on('planes_entrenamiento')->onDelete('cascade');
+            $table->foreign('id_plan')->references('id')->on('plan_entrenamientos')->onDelete('cascade');
 
             $table->dateTime('fecha'); // DateTime es mejor para agendar hora exacta
             $table->string('nombre', 150);
