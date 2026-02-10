@@ -13,3 +13,7 @@ Route::get('/', function () {
 
 Route::get('/ciclista', [CiclistaController::class, 'index'])->name('ciclista.index');
 Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

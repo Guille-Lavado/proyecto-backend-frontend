@@ -14,7 +14,23 @@ class CiclistaController extends Controller
      */
     public function index()
     {
-        return Ciclista::query()->orderBy('created_at', 'desc')->get();
+        $ciclistas = Ciclista::query()->orderBy('created_at', 'desc')->get();
+
+        for ($i = 0; $i < count($ciclistas); $i++) {
+            $ciclista = $ciclistas[$i];
+            $user_ciclista = $ciclista->user;
+            
+            $ciclistas[$i] = [
+                "id" => $ciclista["id"],
+                "nombre" => $user_ciclista["name"],
+                "apellido" => $ciclista["apellido"],
+                "fecha_nacimiento" => $ciclista["fecha_nacimiento"],
+                "peso_base" => $ciclista["peso_base"],
+                "altura_base" => $ciclista["altura_base"],
+            ];
+        }
+
+        return $ciclistas;
     }
 
     /**

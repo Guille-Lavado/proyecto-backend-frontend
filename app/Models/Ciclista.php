@@ -3,28 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\User;
 
 class Ciclista extends Model
 {
     protected $fillable = [
-        'nombre',
+        'id_user',
         'apellido',
         "fecha_nacimiento",
         "peso_base",
         "altura_base",
-        "email",
-        "password",
-        'published_at',
     ];
     protected $dates = [
         'published_at',
     ];
 
-    public function planes() {
-        return $this->hasMany(Plan_entrenamiento::class, "id_ciclista");
-    }
-
-    public function historicos() {
-        return $this->hasMany(Historico_ciclista::class, 'id_ciclista');
+    public function user() {
+        return $this->belongsTo(User::class, 'id_user');
     }
 }

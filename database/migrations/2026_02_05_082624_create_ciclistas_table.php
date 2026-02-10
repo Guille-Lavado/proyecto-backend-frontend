@@ -16,14 +16,18 @@ class CreateCiclistasTable extends Migration
         // Tabla ciclistas
         Schema::create('ciclistas', function (Blueprint $table) {
             $table->id();
-            $table->string("nombre");
-            $table->string("apellido");
+            $table->string("apellido")->nullable();
             $table->timestamp("fecha_nacimiento")->nullable();
+            $table->integer("peso_base")->nullable();
+            $table->integer("altura_base")->nullable();
             $table->timestamps();
-            $table->integer("peso_base");
-            $table->integer("altura_base");
-            $table->string("email");
-            $table->string("password", 60);
+
+            // Crear clave foranea que se relaciona con la tabla users 
+            $table->unsignedBigInteger('id_user');
+            $table->foreign('id_user')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
 
         // Tabla bicicletas
