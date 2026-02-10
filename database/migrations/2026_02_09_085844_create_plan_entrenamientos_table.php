@@ -24,8 +24,8 @@ class CreatePlanEntrenamientosTable extends Migration
             $table->timestamps();
 
             // Crear clave foranea que se relaciona con la tabla ciclistas 
-            $table->unsignedBigInteger('ciclista_id');
-            $table->foreign('ciclista_id')
+            $table->unsignedBigInteger('id_ciclista');
+            $table->foreign('id_ciclista')
                 ->references('id')
                 ->on('ciclistas')
                 ->onDelete('cascade');

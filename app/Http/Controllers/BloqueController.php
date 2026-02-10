@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Bloques_entrenamiento;
+use App\Models\BloqueEntrenamiento;
 use Illuminate\Http\Request;
 
 class BloqueController extends Controller
@@ -14,7 +14,7 @@ class BloqueController extends Controller
      */
     public function index()
     {
-        return Bloques_entrenamiento::query()->orderBy('created_at', 'desc')->get();
+        return BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
     }
 
     /**

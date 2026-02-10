@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Models\Bloques_entrenamiento;
+use App\Models\BloqueEntrenamiento;
 
 class BloqueSeeder extends Seeder
 {
@@ -12,6 +12,6 @@ class BloqueSeeder extends Seeder
      */
     public function run()
     {
-        factory(Bloques_entrenamiento::class, 3)->create();
+        factory(BloqueEntrenamiento::class, 3)->create();
     }
 }

@@ -5,11 +5,11 @@ sudo docker compose exec app composer global require laravel/installer
 
 -- Modelos y Migraciones --
 sudo docker compose exec app php artisan make:model Ciclista -m
-sudo docker compose exec app php artisan make:model Plan_entrenamiento -m
-sudo docker compose exec app php artisan make:model tipos_componente -m
-sudo docker compose exec app php artisan make:model Bloques_entrenamiento -m
-sudo docker compose exec app php artisan make:model Historico_ciclista -m
-sudo docker compose exec app php artisan make:model Componentes_bicicleta -m
+sudo docker compose exec app php artisan make:model PlanEntrenamiento -m
+sudo docker compose exec app php artisan make:model TipoComponente -m
+sudo docker compose exec app php artisan make:model BloqueEntrenamiento -m
+sudo docker compose exec app php artisan make:model HistoricoCiclista -m
+sudo docker compose exec app php artisan make:model ComponenteBicicleta -m
 sudo docker compose exec app php artisan make:model Bicicleta
 
     -- Ejecutar Migraciones -- 

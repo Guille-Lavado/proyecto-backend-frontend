@@ -20,7 +20,7 @@ class Ciclista extends Model
         'published_at',
     ];
 
-    public function plan_entrenamiento() {
+    public function planes() {
         return $this->hasMany(Plan_entrenamiento::class, "id_ciclista");
     }
 

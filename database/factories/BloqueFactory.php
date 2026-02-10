@@ -2,10 +2,10 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use App\Models\Bloques_entrenamiento;
+use App\Models\BloqueEntrenamiento;
 use Faker\Generator as Faker;
 
-$factory->define(Bloques_entrenamiento::class, function (Faker $faker) {
+$factory->define(BloqueEntrenamiento::class, function (Faker $faker) {
     return [
         "nombre" => $faker->firstName(),
         'descripcion' => $faker->text(100),

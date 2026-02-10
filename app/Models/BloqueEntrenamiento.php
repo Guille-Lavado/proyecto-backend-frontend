@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bloques_entrenamiento extends Model
+class BloqueEntrenamiento extends Model
 {
+    protected $table = 'bloques_entrenamientos';
     protected $fillable = [
         'nombre',
         'descripcion',

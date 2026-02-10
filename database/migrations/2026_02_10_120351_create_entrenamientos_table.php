@@ -24,7 +24,7 @@ class CreateEntrenamientosTable extends Migration
             $table->foreign('id_bicicleta')->references('id')->on('bicicletas')->nullOnDelete();
 
             $table->unsignedBigInteger('id_sesion')->nullable();
-            $table->foreign('id_sesion')->references('id')->on('sesiones_entrenamiento')->nullOnDelete();
+            $table->foreign('id_sesion')->references('id')->on('sesiones_entrenamientos')->nullOnDelete();
 
             $table->dateTime('fecha');
             $table->integer('duracion');
@@ -47,7 +47,7 @@ class CreateEntrenamientosTable extends Migration
             $table->id();
 
             $table->unsignedBigInteger('id_sesion_entrenamiento');
-            $table->foreign('id_sesion_entrenamiento')->references('id')->on('sesiones_entrenamiento')->onDelete('cascade');
+            $table->foreign('id_sesion_entrenamiento')->references('id')->on('sesiones_entrenamientos')->onDelete('cascade');
 
             $table->unsignedBigInteger('id_bloque_entrenamiento');
             $table->foreign('id_bloque_entrenamiento')->references('id')->on('bloques_entrenamientos')->onDelete('restrict');

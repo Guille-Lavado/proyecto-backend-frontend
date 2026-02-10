@@ -13,7 +13,7 @@ class CreateTiposComponentesTable extends Migration
      */
     public function up()
     {
-        Schema::create('tipos_componente', function (Blueprint $table) {
+        Schema::create('tipos_componentes', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();

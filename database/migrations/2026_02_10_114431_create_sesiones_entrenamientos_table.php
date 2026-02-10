@@ -13,8 +13,8 @@ class CreateSesionesEntrenamientosTable extends Migration
      */
     public function up()
     {
-        // 8. Tabla: sesiones_entrenamiento
-        Schema::create('sesiones_entrenamiento', function (Blueprint $table) {
+        // 8. Tabla: sesiones_entrenamientos
+        Schema::create('sesiones_entrenamientos', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger('id_plan');

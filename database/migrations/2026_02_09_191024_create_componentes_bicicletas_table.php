@@ -25,7 +25,7 @@ class CreateComponentesBicicletasTable extends Migration
             $table->unsignedBigInteger('id_tipo_componente');
             $table->foreign('id_tipo_componente')
                 ->references('id')
-                ->on('tipos_componente');
+                ->on('tipos_componentes');
 
             $table->string('marca', 100)->nullable();
             $table->string('modelo', 100)->nullable();
