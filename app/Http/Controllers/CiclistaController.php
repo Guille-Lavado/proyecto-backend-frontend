@@ -4,9 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Ciclista;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CiclistaController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,21 +25,23 @@ class CiclistaController extends Controller
      */
     public function index()
     {
-        $ciclistas = Ciclista::query()->orderBy('created_at', 'desc')->get();
+        $id_ciclista = Auth::user()->id;
 
-        for ($i = 0; $i < count($ciclistas); $i++) {
-            $ciclista = $ciclistas[$i];
-            $user_ciclista = $ciclista->user;
+        $ciclistas = Ciclista::query()->where('id_user', '=', $id_ciclista)->get();
+
+        // for ($i = 0; $i < count($ciclistas); $i++) {
+        //     $ciclista = $ciclistas[$i];
+        //     $user_ciclista = $ciclista->user;
             
-            $ciclistas[$i] = [
-                "id" => $ciclista["id"],
-                "nombre" => $user_ciclista["name"],
-                "apellido" => $ciclista["apellido"],
-                "fecha_nacimiento" => $ciclista["fecha_nacimiento"],
-                "peso_base" => $ciclista["peso_base"],
-                "altura_base" => $ciclista["altura_base"],
-            ];
-        }
+        //     $ciclistas[$i] = [
+        //         "id" => $ciclista["id"],
+        //         "nombre" => $user_ciclista["name"],
+        //         "apellido" => $ciclista["apellido"],
+        //         "fecha_nacimiento" => $ciclista["fecha_nacimiento"],
+        //         "peso_base" => $ciclista["peso_base"],
+        //         "altura_base" => $ciclista["altura_base"],
+        //     ];
+        // }
 
         return $ciclistas;
     }

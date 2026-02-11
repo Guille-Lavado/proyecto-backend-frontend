@@ -15,6 +15,10 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+
+                    @if(Auth::check())
+                        Hola {{ Auth::user()->name }}
+                    @endif
                 </div>
             </div>
         </div>
