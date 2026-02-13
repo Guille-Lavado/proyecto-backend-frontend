@@ -16,7 +16,5 @@ Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/', 'HomeController@index')->name('home');
-
-// Route::get("/", [CiclistaController::class, 'index'])->name('ciclista.index');
+Route::get('/home', 'CiclistaController@index')->name('home');
+Route::get('/', 'CiclistaController@index')->name('home');

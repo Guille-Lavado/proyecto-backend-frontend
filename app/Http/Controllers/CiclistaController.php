@@ -43,7 +43,7 @@ class CiclistaController extends Controller
         //     ];
         // }
 
-        return $ciclistas;
+        return view('home');
     }
 
     /**
