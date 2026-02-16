@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BloqueEntrenamiento;
+use App\Models\SesionEntrenamiento;
 use Illuminate\Http\Request;
 
-class BloqueController extends Controller
+class SesionController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    // listar todos los Bloques de un usuario de la bd en formato json
     public function index()
     {
-        $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
-
-        return response()->json($bloques);
+        $sesiones = SesionEntrenamiento::all();
+        return response()->json($sesiones, 200);
     }
 
     /**
@@ -38,26 +36,19 @@ class BloqueController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validar los datos
-        $validatedData = $request->validate([
-            'nombre'            => 'required|string|max:100',
-            'descripcion'       => 'nullable|string',
-            'tipo'              => 'required|string|max:50',
-            'duracion_estimada' => 'required|integer',
-            'potencia_pct_min'  => 'nullable|integer',
-            'potencia_pct_max'  => 'nullable|integer',
-            'pulso_pct_max'     => 'nullable|integer',
-            'pulso_reserva_pct' => 'nullable|integer',
-            'comentario'        => 'nullable|string',
+        $validated = $request->validate([
+            'id_plan'     => 'required|exists:plan_entrenamientos,id',
+            'fecha'       => 'required|date',
+            'nombre'      => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'completada'  => 'boolean'
         ]);
 
-        // 2. Insertar en la base de datos
-        $bloque = BloqueEntrenamiento::create($validatedData);
+        $sesion = SesionEntrenamiento::create($validated);
 
-        // 3. Retornar respuesta
         return response()->json([
-            'message' => 'Bloque creado',
-            'data' => $bloque
+            'message' => 'Sesión creada',
+            'data' => $sesion
         ], 201);
     }
 
@@ -69,9 +60,8 @@ class BloqueController extends Controller
      */
     public function show($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
-
-        return response()->json($bloque);
+        $sesion = SesionEntrenamiento::findOrFail($id);
+        return response()->json($sesion, 200);
     }
 
     /**
@@ -105,11 +95,11 @@ class BloqueController extends Controller
      */
     public function destroy($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
-        $bloque->delete();
+        $sesion = SesionEntrenamiento::findOrFail($id);
+        $sesion->delete();
 
         return response()->json([
-            'message' => 'Bloque eliminado'
+            'message' => 'Sesión eliminada'
         ], 200);
     }
 }

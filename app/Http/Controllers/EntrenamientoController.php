@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BloqueEntrenamiento;
+use App\Models\Entrenamiento;
 use Illuminate\Http\Request;
 
-class BloqueController extends Controller
+class EntrenamientoController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    // listar todos los Bloques de un usuario de la bd en formato json
     public function index()
     {
-        $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
-
-        return response()->json($bloques);
+        //
     }
 
     /**
@@ -38,26 +35,30 @@ class BloqueController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validar los datos
-        $validatedData = $request->validate([
-            'nombre'            => 'required|string|max:100',
-            'descripcion'       => 'nullable|string',
-            'tipo'              => 'required|string|max:50',
-            'duracion_estimada' => 'required|integer',
-            'potencia_pct_min'  => 'nullable|integer',
-            'potencia_pct_max'  => 'nullable|integer',
-            'pulso_pct_max'     => 'nullable|integer',
-            'pulso_reserva_pct' => 'nullable|integer',
-            'comentario'        => 'nullable|string',
+        $validated = $request->validate([
+            'id_ciclista'          => 'required|exists:ciclistas,id',
+            'id_bicicleta'         => 'nullable|exists:bicicletas,id',
+            'id_sesion'            => 'nullable|exists:sesiones_entrenamiento,id',
+            'fecha'                => 'required|date',
+            'duracion'             => 'required|integer',
+            'kilometros'           => 'required|numeric',
+            'recorrido'            => 'nullable|string',
+            'pulso_medio'          => 'nullable|integer',
+            'pulso_max'            => 'nullable|integer',
+            'potencia_media'       => 'nullable|integer',
+            'potencia_normalizada' => 'nullable|integer',
+            'velocidad_media'      => 'nullable|numeric',
+            'puntos_estres_tss'    => 'nullable|numeric',
+            'factor_intensidad_if' => 'nullable|numeric',
+            'ascenso_metros'       => 'nullable|integer',
+            'comentario'           => 'nullable|string',
         ]);
 
-        // 2. Insertar en la base de datos
-        $bloque = BloqueEntrenamiento::create($validatedData);
+        $actividad = Entrenamiento::create($validated);
 
-        // 3. Retornar respuesta
         return response()->json([
-            'message' => 'Bloque creado',
-            'data' => $bloque
+            'message' => 'Actividad registrada correctamente',
+            'data' => $actividad
         ], 201);
     }
 
@@ -69,9 +70,9 @@ class BloqueController extends Controller
      */
     public function show($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
+        $actividad = Entrenamiento::with(['ciclista', 'bicicleta'])->findOrFail($id);
 
-        return response()->json($bloque);
+        return response()->json($actividad, 200);
     }
 
     /**
@@ -105,11 +106,6 @@ class BloqueController extends Controller
      */
     public function destroy($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
-        $bloque->delete();
-
-        return response()->json([
-            'message' => 'Bloque eliminado'
-        ], 200);
+        //
     }
 }

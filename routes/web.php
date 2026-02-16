@@ -12,7 +12,7 @@ use App\Http\Controllers\BloqueController;
 // });
 
 // Route::get('/ciclista', [CiclistaController::class, 'index'])->name('ciclista.index');
-Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');
+// Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');
 
 Auth::routes();
 

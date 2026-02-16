@@ -113,8 +113,8 @@ class CiclistaController extends Controller
     }
 
     // listar todos los cicistas de la bd en formato json
-    public function listarCiclistasAPI(Ciclista $ciclista) {
-        $ciclista = Ciclista::query()->orderBy('created_at', 'desc')->get();
-        return response()->json($ciclista);
-    }
+    // public function listarCiclistasAPI(Ciclista $ciclista) {
+    //     $ciclista = Ciclista::query()->orderBy('created_at', 'desc')->get();
+    //     return response()->json($ciclista);
+    // }
 }

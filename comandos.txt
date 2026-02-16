@@ -18,6 +18,9 @@ sudo docker compose exec app php artisan make:model Bicicleta
 -- Controladores --
 sudo docker compose exec app php artisan make:controller CiclistaController --resource
 sudo docker compose exec app php artisan make:controller BloqueController --resource
+sudo docker compose exec app php artisan make:controller PlanController --resource
+sudo docker compose exec app php artisan make:controller SesionController --resource
+sudo docker compose exec app php artisan make:controller EntrenamientoController --resource
 
 -- Factorias --
 sudo docker compose exec app php artisan make:factory CiclistaFactory --model=Ciclista

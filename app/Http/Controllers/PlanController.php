@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BloqueEntrenamiento;
+use App\Models\PlanEntrenamiento;
 use Illuminate\Http\Request;
 
-class BloqueController extends Controller
+class PlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    // listar todos los Bloques de un usuario de la bd en formato json
+    // Listar todos los planes en formato json
     public function index()
     {
-        $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
-
-        return response()->json($bloques);
+        $planes = PlanEntrenamiento::all();
+        return response()->json($planes, 200);
     }
 
     /**
@@ -38,26 +37,21 @@ class BloqueController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validar los datos
-        $validatedData = $request->validate([
-            'nombre'            => 'required|string|max:100',
-            'descripcion'       => 'nullable|string',
-            'tipo'              => 'required|string|max:50',
-            'duracion_estimada' => 'required|integer',
-            'potencia_pct_min'  => 'nullable|integer',
-            'potencia_pct_max'  => 'nullable|integer',
-            'pulso_pct_max'     => 'nullable|integer',
-            'pulso_reserva_pct' => 'nullable|integer',
-            'comentario'        => 'nullable|string',
+        $validated = $request->validate([
+            'id_ciclista'  => 'required|exists:ciclistas,id',
+            'nombre'       => 'required|string|max:255',
+            'descripcion'  => 'nullable|string',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin'    => 'required|date|after_or_equal:fecha_inicio',
+            'objetivo'     => 'nullable|string',
+            'activo'       => 'boolean'
         ]);
 
-        // 2. Insertar en la base de datos
-        $bloque = BloqueEntrenamiento::create($validatedData);
+        $plan = PlanEntrenamiento::create($validated);
 
-        // 3. Retornar respuesta
         return response()->json([
-            'message' => 'Bloque creado',
-            'data' => $bloque
+            'message' => 'Plan creado',
+            'data' => $plan
         ], 201);
     }
 
@@ -69,9 +63,7 @@ class BloqueController extends Controller
      */
     public function show($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
-
-        return response()->json($bloque);
+        //
     }
 
     /**
@@ -94,7 +86,23 @@ class BloqueController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $plan = PlanEntrenamiento::findOrFail($id);
+
+        $validated = $request->validate([
+            'nombre'       => 'string|max:255',
+            'descripcion'  => 'nullable|string',
+            'fecha_inicio' => 'date',
+            'fecha_fin'    => 'date|after_or_equal:fecha_inicio',
+            'objetivo'     => 'nullable|string',
+            'activo'       => 'boolean'
+        ]);
+
+        $plan->update($validated);
+
+        return response()->json([
+            'message' => 'Plan actualizado',
+            'data' => $plan
+        ], 200);
     }
 
     /**
@@ -105,11 +113,11 @@ class BloqueController extends Controller
      */
     public function destroy($id)
     {
-        $bloque = BloqueEntrenamiento::findOrFail($id);
-        $bloque->delete();
+        $plan = PlanEntrenamiento::findOrFail($id);
+        $plan->delete();
 
         return response()->json([
-            'message' => 'Bloque eliminado'
+            'message' => 'Plan eliminado'
         ], 200);
     }
 }
