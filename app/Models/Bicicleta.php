@@ -13,6 +13,6 @@ class Bicicleta extends Model
     ];
 
     public function componentes() {
-        return $this->hasMany(Componente_bicicleta::class, 'id_bicicleta');
+        return $this->hasMany(ComponenteBicicleta::class, 'id_bicicleta');
     }
 }

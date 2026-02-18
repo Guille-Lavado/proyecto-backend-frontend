@@ -2,6 +2,8 @@
 sudo docker compose build
 sudo docker compose up -d
 sudo docker compose exec app composer global require laravel/installer
+sudo docker compose exec app composer require laravel/ui:^2.0
+sudo docker compose exec app composer require laravel/sanctum
 
 -- Modelos y Migraciones --
 sudo docker compose exec app php artisan make:model Ciclista -m
@@ -21,6 +23,7 @@ sudo docker compose exec app php artisan make:controller BloqueController --reso
 sudo docker compose exec app php artisan make:controller PlanController --resource
 sudo docker compose exec app php artisan make:controller SesionController --resource
 sudo docker compose exec app php artisan make:controller EntrenamientoController --resource
+sudo docker compose exec app php artisan make:controller Api/AuthController --resource
 
 -- Factorias --
 sudo docker compose exec app php artisan make:factory CiclistaFactory --model=Ciclista

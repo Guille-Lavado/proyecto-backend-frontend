@@ -54,11 +54,11 @@ class EntrenamientoController extends Controller
             'comentario'           => 'nullable|string',
         ]);
 
-        $actividad = Entrenamiento::create($validated);
+        $entrenamiento = Entrenamiento::create($validated);
 
         return response()->json([
             'message' => 'Actividad registrada correctamente',
-            'data' => $actividad
+            'data' => $entrenamiento
         ], 201);
     }
 
@@ -70,9 +70,9 @@ class EntrenamientoController extends Controller
      */
     public function show($id)
     {
-        $actividad = Entrenamiento::with(['ciclista', 'bicicleta'])->findOrFail($id);
+        $entrenamiento = Entrenamiento::with(['ciclista', 'bicicleta'])->findOrFail($id);
 
-        return response()->json($actividad, 200);
+        return response()->json($entrenamiento, 200);
     }
 
     /**

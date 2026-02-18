@@ -25,23 +25,22 @@ class CiclistaController extends Controller
      */
     public function index()
     {
-        $id_ciclista = Auth::user()->id;
+        $id_user = Auth::id();
+        $user = Auth::user();
 
-        $ciclistas = Ciclista::query()->where('id_user', '=', $id_ciclista)->get();
+        $ciclista = Ciclista::findOrFail($id_user);
+        $ciclista = Ciclista::query()->where('id', '=', $id_user)->first();
 
-        // for ($i = 0; $i < count($ciclistas); $i++) {
-        //     $ciclista = $ciclistas[$i];
-        //     $user_ciclista = $ciclista->user;
-            
-        //     $ciclistas[$i] = [
-        //         "id" => $ciclista["id"],
-        //         "nombre" => $user_ciclista["name"],
-        //         "apellido" => $ciclista["apellido"],
-        //         "fecha_nacimiento" => $ciclista["fecha_nacimiento"],
-        //         "peso_base" => $ciclista["peso_base"],
-        //         "altura_base" => $ciclista["altura_base"],
-        //     ];
-        // }
+        echo $ciclista;
+
+        // $ciclista = [
+        //    "id" => $ciclista["id"],
+        //     "nombre" => $user["name"],
+        //     "apellido" => $ciclista["apellido"],
+        //     "fecha_nacimiento" => $ciclista["fecha_nacimiento"],
+        //     "peso_base" => $ciclista["peso_base"],
+        //     "altura_base" => $ciclista["altura_base"],
+        // ];
 
         return view('home');
     }

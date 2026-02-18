@@ -17,7 +17,7 @@ class BloqueController extends Controller
     {
         $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
 
-        return response()->json($bloques);
+        return response()->json($bloques, 200);
     }
 
     /**
@@ -71,7 +71,7 @@ class BloqueController extends Controller
     {
         $bloque = BloqueEntrenamiento::findOrFail($id);
 
-        return response()->json($bloque);
+        return response()->json($bloque, 200);
     }
 
     /**
