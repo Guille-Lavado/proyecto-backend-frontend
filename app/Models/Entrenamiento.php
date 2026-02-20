@@ -21,7 +21,7 @@ class Entrenamiento extends Model
         return $this->belongsTo(Bicicleta::class, 'id_bicicleta');
     }
 
-    public function sesionOriginal() {
+    public function sesion() {
         return $this->belongsTo(SesionEntrenamiento::class, 'id_sesion');
     }
 }

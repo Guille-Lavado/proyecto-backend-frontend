@@ -70,10 +70,8 @@ class SesionController extends Controller
      */
     public function show($id)
     {
-        // with(['bloque'])
-        $sesion = SesionEntrenamiento::findOrFail($id);
-        $bloques = $sesion->bloques;
-        return response()->json($bloques, 200);
+        $sesion = SesionEntrenamiento::with(["bloques", "plan"])->findOrFail($id);
+        return response()->json($sesion, 200);
     }
 
     /**
@@ -108,6 +106,7 @@ class SesionController extends Controller
     public function destroy($id)
     {
         $sesion = SesionEntrenamiento::findOrFail($id);
+
         $sesion->delete();
 
         return response()->json([

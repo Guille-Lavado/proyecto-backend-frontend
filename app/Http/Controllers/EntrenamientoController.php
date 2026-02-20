@@ -12,9 +12,11 @@ class EntrenamientoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function getAll()
     {
-        //
+        $entrenamientos = Entrenamiento::all();
+        
+        return response()->json($entrenamientos, 200);
     }
 
     /**
@@ -70,7 +72,7 @@ class EntrenamientoController extends Controller
      */
     public function show($id)
     {
-        $entrenamiento = Entrenamiento::with(['ciclista', 'bicicleta'])->findOrFail($id);
+        $entrenamiento = Entrenamiento::with(['ciclista', 'bicicleta', "sesion"])->findOrFail($id);
 
         return response()->json($entrenamiento, 200);
     }

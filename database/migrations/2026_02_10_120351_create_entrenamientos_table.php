@@ -17,14 +17,14 @@ class CreateEntrenamientosTable extends Migration
         Schema::create('entrenamientos', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('id_ciclista');
-            $table->foreign('id_ciclista')->references('id')->on('ciclistas')->onDelete('cascade');
+            $table->foreignId('id_ciclista')->constrained('ciclistas')->onDelete('cascade');
 
-            $table->unsignedBigInteger('id_bicicleta')->nullable();
-            $table->foreign('id_bicicleta')->references('id')->on('bicicletas')->nullOnDelete();
+            $table->foreignId('id_bicicleta')->constrained('bicicletas');
 
-            $table->unsignedBigInteger('id_sesion')->nullable();
-            $table->foreign('id_sesion')->references('id')->on('sesiones_entrenamientos')->nullOnDelete();
+            $table->foreignId('id_sesion')
+                ->nullable()
+                ->constrained('sesiones_entrenamientos')
+                ->onDelete("set null");
 
             $table->dateTime('fecha');
             $table->integer('duracion');
@@ -50,7 +50,7 @@ class CreateEntrenamientosTable extends Migration
             $table->foreign('id_sesion_entrenamiento')->references('id')->on('sesiones_entrenamientos')->onDelete('cascade');
 
             $table->unsignedBigInteger('id_bloque_entrenamiento');
-            $table->foreign('id_bloque_entrenamiento')->references('id')->on('bloques_entrenamientos')->onDelete('restrict');
+            $table->foreign('id_bloque_entrenamiento')->references('id')->on('bloques_entrenamientos')->onDelete('cascade');
 
             $table->integer('orden');
             $table->integer('repeticiones')->default(1);

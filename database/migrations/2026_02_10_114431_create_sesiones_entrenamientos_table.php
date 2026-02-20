@@ -17,10 +17,12 @@ class CreateSesionesEntrenamientosTable extends Migration
         Schema::create('sesiones_entrenamientos', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('id_plan');
-            $table->foreign('id_plan')->references('id')->on('plan_entrenamientos')->onDelete('cascade');
+            $table->foreignId('id_plan')
+                ->nullable()
+                ->constrained('plan_entrenamientos')
+                ->onDelete("set null");
 
-            $table->dateTime('fecha'); // DateTime es mejor para agendar hora exacta
+            $table->dateTime('fecha');
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
             $table->boolean('completada')->default(false);
