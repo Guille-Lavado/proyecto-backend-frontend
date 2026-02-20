@@ -28,7 +28,6 @@ class CiclistaController extends Controller
         $id_user = Auth::id();
         $user = Auth::user();
 
-        $ciclista = Ciclista::findOrFail($id_user);
         $ciclista = Ciclista::query()->where('id', '=', $id_user)->first();
 
         // $ciclista = [

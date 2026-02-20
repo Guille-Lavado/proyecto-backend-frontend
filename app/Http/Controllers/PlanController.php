@@ -114,10 +114,78 @@ class PlanController extends Controller
     public function destroy($id)
     {
         $plan = PlanEntrenamiento::findOrFail($id);
+        
         $plan->delete();
 
         return response()->json([
             'message' => 'Plan eliminado'
+        ], 200);
+    }
+
+    public function getSesionPlan() {
+        $sesiones = PlanEntrenamiento::with(["sesiones"])->get();
+        return response()->json($sesiones, 200);
+    }
+
+    public function crearSesionPlan(Request $request) {
+        $validated = $request->validate([
+            'id_ciclista'            => 'required|exists:ciclistas,id',
+            'nombre'                 => 'required|string|max:255',
+            'descripcion'            => 'nullable|string',
+            'fecha_inicio'           => 'required|date',
+            'fecha_fin'              => 'required|date|after_or_equal:fecha_inicio',
+            'objetivo'               => 'nullable|string',
+            'activo'                 => 'boolean',
+            'sesiones'               => 'required|array',
+            'sesiones.*.fecha'       => 'required|date',
+            'sesiones.*.nombre'      => 'required|string|max:255',
+            'sesiones.*.descripcion' => 'nullable|string',
+            'sesiones.*.completada'  => 'boolean'
+        ]);
+
+        $plan = PlanEntrenamiento::create([
+            'id_ciclista' => $request->id_ciclista,
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'objetivo' => $request->objetivo,
+            'activo' => $request->activo
+        ]);
+
+        foreach ($request->sesiones as $sesionData) {
+                $plan->sesiones()->create([
+                    'id_plan' => $plan->id,
+                    'nombre' => $sesionData['nombre'],
+                    'fecha' => $sesionData['fecha'],
+                    'descripcion' => $sesionData['descripcion'],
+                    'completada' => $sesionData['completada'],
+                ]);
+        }
+
+        return response()->json([
+            'message' => 'Plan con sesiones creado',
+            'data' => $plan->load('sesiones')
+        ], 201);
+    }
+
+    public function deleteSesionPlan($id) {
+        // 1. Buscamos el plan con sus sesiones
+        $plan = PlanEntrenamiento::with('sesiones')->findOrFail($id);
+
+        foreach ($plan->sesiones as $sesion) {
+            // 2. Desvinculasmos los bloques en la tabla pivote 
+            $sesion->bloques()->detach();
+            
+            // 3. Borramos la sesión
+            $sesion->delete();
+        }
+
+        // 4. Borramos el plan
+        $plan->delete();
+
+        return response()->json([
+            'message' => 'Plan y sesiones eliminados correctamente'
         ], 200);
     }
 }
