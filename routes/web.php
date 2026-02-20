@@ -1,20 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\CiclistaController;
-use App\Http\Controllers\BloqueController;
+use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//   $visited = DB::select('select * from places where visited = ?', [1]); 
-//   $togo = DB::select('select * from places where visited = ?', [0]);
+// Captura la raíz y devuelve nuestra vista SPA principal.
+Route::get('/', function () {
+    return view('app');
+});
 
-//   return view('travel_list', ['visited' => $visited, 'togo' => $togo ] );
-// });
-
-// Route::get('/ciclista', [CiclistaController::class, 'index'])->name('ciclista.index');
-// Route::get('/bloque', [BloqueController::class, 'index'])->name('bloque.index');
-
-Auth::routes();
-
-Route::get('/home', 'CiclistaController@index')->name('home');
-Route::get('/', 'CiclistaController@index')->name('home');
+// Para evitar errores 404 si el usuario recarga la página en una vista distinta a la raíz.
+Route::fallback(function () {
+    return view('app');
+});

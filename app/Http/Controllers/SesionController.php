@@ -14,13 +14,14 @@ class SesionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $offset = $_GET["offset"] ?? "";
-        $limit = $_GET["limit"] ?? "";
+        // Usamos el helper del Request de Laravel en lugar de $_GET
+        $offset = $request->query("offset");
+        $limit = $request->query("limit");
 
-        if($offset && $limit) {
-            $sesiones = SesionEntrenamiento::offset($offset)->limit($limit)->get();
+        if ($offset !== null && $limit !== null) {
+            $sesiones = SesionEntrenamiento::offset((int)$offset)->limit((int)$limit)->get();
         } else {
             $sesiones = SesionEntrenamiento::all();
         }
