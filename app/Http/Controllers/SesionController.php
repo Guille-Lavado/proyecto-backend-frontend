@@ -8,13 +8,23 @@ use Illuminate\Http\Request;
 class SesionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Devuelve una lista con todas las sesiones.
+     * Si se usan los parametros offset y limit se devuelve
+     * el número de sesiones entre offset y limit.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function getAll()
     {
-        $sesiones = SesionEntrenamiento::all();
+        $offset = $_GET["offset"] ?? "";
+        $limit = $_GET["limit"] ?? "";
+
+        if($offset && $limit) {
+            $sesiones = SesionEntrenamiento::offset($offset)->limit($limit)->get();
+        } else {
+            $sesiones = SesionEntrenamiento::all();
+        }
+        
         return response()->json($sesiones, 200);
     }
 
@@ -60,8 +70,10 @@ class SesionController extends Controller
      */
     public function show($id)
     {
+        // with(['bloque'])
         $sesion = SesionEntrenamiento::findOrFail($id);
-        return response()->json($sesion, 200);
+        $bloques = $sesion->bloques;
+        return response()->json($bloques, 200);
     }
 
     /**

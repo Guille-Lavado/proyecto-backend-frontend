@@ -13,7 +13,7 @@ class PlanController extends Controller
      * @return \Illuminate\Http\Response
      */
     // Listar todos los planes en formato json
-    public function index()
+    public function getAll()
     {
         $planes = PlanEntrenamiento::all();
         return response()->json($planes, 200);

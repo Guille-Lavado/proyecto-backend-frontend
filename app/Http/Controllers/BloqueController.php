@@ -13,7 +13,7 @@ class BloqueController extends Controller
      * @return \Illuminate\Http\Response
      */
     // listar todos los Bloques de un usuario de la bd en formato json
-    public function index()
+    public function getAll()
     {
         $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
 

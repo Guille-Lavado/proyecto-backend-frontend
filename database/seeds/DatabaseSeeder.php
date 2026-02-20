@@ -42,17 +42,12 @@ class DatabaseSeeder extends Seeder
             'activo' => true,
         ]);
 
-        $id_sesion = DB::table('sesiones_entrenamientos')->insertGetId([
-            'id_plan' => $id_plan,
-            'fecha' => now(),
-            'nombre' => 'Entreno día 1',
-            'completada' => true,
-        ]);
+        $this->call(SesionSeeder::class);
 
         DB::table('entrenamientos')->insert([
             'id_ciclista' => $id_ciclista,
             'id_bicicleta' => $id_bici,
-            'id_sesion' => $id_sesion,
+            'id_sesion' => 1,
             'fecha' => now(),
             'duracion' => rand(3600, 7200),
             'kilometros' => rand(30, 60),
@@ -61,6 +56,26 @@ class DatabaseSeeder extends Seeder
             'puntos_estres_tss' => rand(50, 120),
             'factor_intensidad_if' => rand(70, 90) / 100,
             'ascenso_metros' => rand(200, 1000),
+        ]);
+
+        DB::table("sesion_bloques")->insert([
+            "id_sesion_entrenamiento" => 1,
+            "id_bloque_entrenamiento" => 1,
+            "orden" => 1,
+            "repeticiones" => 3,
+            "duracion_real" => 1,
+            "potencia_real" => 123,
+            "pulso_real" => 120
+        ]);
+
+        DB::table("sesion_bloques")->insert([
+            "id_sesion_entrenamiento" => 1,
+            "id_bloque_entrenamiento" => 2,
+            "orden" => 1,
+            "repeticiones" => 3,
+            "duracion_real" => 1,
+            "potencia_real" => 123,
+            "pulso_real" => 120
         ]);
     }
 }
