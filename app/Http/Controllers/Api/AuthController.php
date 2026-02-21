@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Ciclista;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
@@ -11,34 +12,40 @@ class AuthController extends Controller
 {
    public function register(Request $request)
     {
-        // 1. Validar los datos requeridos por el enunciado
+        // 1. Validar los datos recibidos desde el Frontend (V2)
+        // Ahora validamos unique:users en lugar de unique:ciclistas
         $request->validate([
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:ciclistas', // Ojo: ajusta 'ciclistas' al nombre real de tu tabla si usas otra (ej: 'users')
+            'email' => 'required|string|email|max:255|unique:users', 
             'password' => 'required|string|min:6',
             'fecha_nacimiento' => 'required|date',
             'peso' => 'required|numeric',
             'altura' => 'required|numeric',
         ]);
 
-        // 2. Crear el usuario (Ciclista)
-        // Nota: Asegúrate de que el modelo User/Ciclista tenga estos campos en su $fillable
+        // 2. Crear el Usuario para la Autenticación (Tabla 'users')
         $user = User::create([
-            'nombre' => $request->nombre,
-            'apellidos' => $request->apellidos,
+            'name' => $request->nombre,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'fecha_nacimiento' => $request->fecha_nacimiento,
-            'peso' => $request->peso,
-            'altura' => $request->altura,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
         ]);
 
-        // 3. Opcional: Loguearlo directamente devolviendo el token
+        // 3. Crear el Perfil Deportivo (Tabla 'ciclistas')
+        // Mapeamos los datos del frontend a los nombres de columna de tu tabla
+        \App\Models\Ciclista::create([ // Cambia \App\Ciclista por \App\Models\Ciclista si usas carpeta Models
+            'id_user' => $user->id,
+            'apellido' => $request->apellidos,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'peso_base' => $request->peso,
+            'altura_base' => $request->altura,
+        ]);
+
+        // 4. Iniciar sesión automáticamente devolviendo el Token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Usuario registrado con éxito',
+            'message' => 'Usuario y Perfil de Ciclista registrados con éxito',
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user
