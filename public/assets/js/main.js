@@ -1,70 +1,105 @@
 /**
  * TrainBike - Frontend Application Entry Point
- * Desarrollado puramente con Vanilla JS (ES6+) y la API del DOM.
+ * V1: Maquetación y control del DOM para Autenticación
  */
 
-// Constantes de la aplicación
-const API_BASE_URL = 'http://localhost:8000/api'; // Ajusta esto según tu entorno local
+const API_BASE_URL = '/api'; // Como estamos en el mismo servidor Laravel, usamos ruta relativa
 const appContainer = document.getElementById('app-container');
 const mainNav = document.getElementById('mainNav');
 
-/**
- * Función inicializadora de la aplicación.
- * Evalúa el estado de autenticación y carga la vista correspondiente.
- */
 function initApp() {
-    // Simularemos la verificación de token para esta fase 0
     const token = localStorage.getItem('auth_token');
 
     if (!token) {
-        // Redirigir a lógica de login (V1)
-        renderPlaceholder("Por favor, inicia sesión (Pantalla de Auth en V1)");
+        // Si no hay token, renderizamos la pantalla de Login
+        renderLogin();
     } else {
-        // Usuario logueado: mostrar menú y cargar vista por defecto
         mainNav.classList.remove('d-none');
         setupNavigation();
-        renderPlaceholder("Bienvenido a TrainBike. Selecciona una opción del menú.");
+        renderPlaceholder("Bienvenido a TrainBike. (Vistas en desarrollo)");
     }
 }
 
 /**
- * Configura los event listeners para la navegación SPA.
+ * Limpia el contenedor principal de forma segura.
+ * Alternativa moderna y segura a appContainer.innerHTML = ''
  */
+function clearAppContainer() {
+    appContainer.replaceChildren(); 
+}
+
+/**
+ * Renderiza la vista de Inicio de Sesión usando la etiqueta <template>
+ */
+function renderLogin() {
+    clearAppContainer();
+    
+    const template = document.getElementById('tpl-login');
+    // Clonamos el contenido del template en memoria
+    const clone = template.content.cloneNode(true);
+
+    // Añadimos los event listeners a los elementos del nodo clonado antes de insertarlo
+    const linkRegister = clone.getElementById('link-register');
+    linkRegister.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderRegister();
+    });
+
+    const formLogin = clone.getElementById('form-login');
+    formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // En la V2 añadiremos la petición fetch aquí
+        console.log("Formulario de login enviado (Pendiente de lógica fetch)");
+    });
+
+    // Finalmente, insertamos el nodo clonado en el DOM
+    appContainer.appendChild(clone);
+}
+
+/**
+ * Renderiza la vista de Registro usando la etiqueta <template>
+ */
+function renderRegister() {
+    clearAppContainer();
+
+    const template = document.getElementById('tpl-register');
+    const clone = template.content.cloneNode(true);
+
+    const linkLogin = clone.getElementById('link-login');
+    linkLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderLogin();
+    });
+
+    const formRegister = clone.getElementById('form-register');
+    formRegister.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // En la V2 añadiremos la petición fetch aquí
+        console.log("Formulario de registro enviado (Pendiente de lógica fetch)");
+    });
+
+    appContainer.appendChild(clone);
+}
+
+// (Mantenemos setupNavigation y renderPlaceholder de la V0 aquí abajo)
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
-    
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const view = e.target.getAttribute('data-view');
-            
-            // Actualizar estado activo en la UI
             navLinks.forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
-
-            // Cargar la vista solicitada (Mockup por ahora)
-            renderPlaceholder(`Vista cargada: ${view.toUpperCase()}`);
+            renderPlaceholder(`Vista cargada: ${e.target.getAttribute('data-view').toUpperCase()}`);
         });
     });
 }
 
-/**
- * Función auxiliar temporal para renderizar texto seguro.
- * Utiliza textContent puro, respetando la regla de 0 HTML injection.
- * @param {string} text - El texto a mostrar.
- */
 function renderPlaceholder(text) {
-    // Vaciamos el contenedor de forma segura
-    while (appContainer.firstChild) {
-        appContainer.removeChild(appContainer.firstChild);
-    }
-
+    clearAppContainer();
     const heading = document.createElement('h3');
     heading.className = 'text-center mt-5 text-secondary fade-in';
     heading.textContent = text;
-
     appContainer.appendChild(heading);
 }
 
-// Iniciar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', initApp);
