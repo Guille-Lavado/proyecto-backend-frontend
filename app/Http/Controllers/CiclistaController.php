@@ -39,7 +39,7 @@ class CiclistaController extends Controller
         //     "altura_base" => $ciclista["altura_base"],
         // ];
 
-        return view('home');
+        return view('app');
     }
 
     /**
