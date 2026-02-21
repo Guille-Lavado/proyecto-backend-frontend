@@ -424,18 +424,72 @@ function renderBloqueForm() {
         renderBloquesList();
     });
 
-    // Capturar el evento Submit del formulario
-    const formBloque = clone.getElementById('form-form-bloque') || clone.getElementById('form-bloque');
-    formBloque.addEventListener('submit', (e) => {
-        e.preventDefault(); // Evitamos que el navegador recargue la página
-        
-        // El navegador ya ha validado los 'required', 'min' y 'max' por nosotros
-        showToast("Formulario validado correctamente. En la V8 lo enviaremos a la API.", "success");
-        
-        // Aquí llamaremos a handleBloqueSubmit() en la V8
-    });
+    // Capturar el evento Submit del formulario y conectarlo a nuestra lógica
+    const formBloque = clone.getElementById('form-bloque');
+    formBloque.addEventListener('submit', handleBloqueSubmit);
 
     appContainer.appendChild(clone);
+}
+
+/**
+ * Procesa el envío del formulario de Bloques, construyendo el JSON
+ * y realizando la petición POST a la API.
+ */
+async function handleBloqueSubmit(e) {
+    e.preventDefault(); // Evitamos la recarga
+
+    // Helper para no enviar strings vacíos como si fueran números a la BBDD
+    const getIntOrNull = (id) => {
+        const val = document.getElementById(id).value;
+        return val ? parseInt(val) : null;
+    };
+
+    // Construimos el payload (cuerpo de la petición) mapeando los IDs del HTML
+    // a los nombres de columna de la base de datos
+    const payload = {
+        nombre: document.getElementById('bq-nombre').value,
+        tipo: document.getElementById('bq-tipo').value,
+        descripcion: document.getElementById('bq-descripcion').value || null,
+        duracion_estimada: getIntOrNull('bq-duracion'),
+        potencia_pct_min: getIntOrNull('bq-pot-min'),
+        potencia_pct_max: getIntOrNull('bq-pot-max'),
+        pulso_pct_max: getIntOrNull('bq-pulso-max'),
+        pulso_reserva_pct: getIntOrNull('bq-pulso-res'),
+        comentario: document.getElementById('bq-comentario').value || null
+    };
+
+    try {
+        // Mostramos feedback de carga visual si queremos (opcional)
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const textOriginal = btnSubmit.textContent;
+        btnSubmit.textContent = 'Guardando...';
+        btnSubmit.disabled = true;
+
+        // Utilizamos nuestro interceptor para enviar la petición con el token
+        const response = await fetchAPI('/bloque/crear', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast("¡Bloque de entrenamiento creado con éxito!", "success");
+            // Reactividad: Volvemos automáticamente al listado
+            // renderBloquesList() se encargará de hacer el GET y mostrar el nuevo bloque
+            renderBloquesList(); 
+        } else {
+            // Manejo de errores de validación del backend (ej: código 422)
+            console.error("Errores de validación:", data.errors);
+            showToast(data.message || 'Error al guardar el bloque. Revisa los datos.', "danger");
+            
+            // Restauramos el botón
+            btnSubmit.textContent = textOriginal;
+            btnSubmit.disabled = false;
+        }
+    } catch (error) {
+        showToast("Error de red al conectar con el servidor.", "danger");
+    }
 }
 
 /* ==========================================
