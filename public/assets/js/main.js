@@ -270,15 +270,146 @@ function renderBloquesList() {
     const template = document.getElementById('tpl-bloques-list');
     const clone = template.content.cloneNode(true);
 
-    // Capturamos el botón de crear antes de insertarlo
     const btnNuevo = clone.getElementById('btn-nuevo-bloque');
     btnNuevo.addEventListener('click', () => {
-        showToast("Formulario de creación en desarrollo (V7)", "info");
+        // En la V7 cambiaremos esto para que cargue el formulario
+        showToast("Cargando formulario de creación (V7)...", "info");
     });
 
     appContainer.appendChild(clone);
 
-    // Aquí llamaremos a la función fetchBloques() en la V6 para llenar la tabla
+    // Una vez el esqueleto está en el DOM, disparamos la petición asíncrona
+    fetchBloques();
+}
+
+/**
+ * Petición asíncrona para obtener los bloques del usuario.
+ */
+async function fetchBloques() {
+    try {
+        const response = await fetchAPI('/bloque');
+        const bloques = await response.json();
+        
+        // Llamamos a la función encargada de construir los nodos
+        renderBloquesRows(bloques);
+    } catch (error) {
+        const tbody = document.getElementById('bloques-tbody');
+        if (tbody) {
+            tbody.replaceChildren(); // Vaciamos el estado de carga
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 5;
+            td.className = 'text-center text-danger py-4';
+            td.textContent = 'Error al cargar los datos del servidor. Inténtalo de nuevo.';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        }
+    }
+}
+
+/**
+ * Construye dinámicamente las filas de la tabla de bloques usando la API del DOM.
+ * 0% HTML Injection.
+ * @param {Array} bloques - Array de objetos de bloques
+ */
+function renderBloquesRows(bloques) {
+    const tbody = document.getElementById('bloques-tbody');
+    if (!tbody) return;
+
+    // Limpiamos la fila de "Cargando..."
+    tbody.replaceChildren();
+
+    // Caso: No hay datos
+    if (!Array.isArray(bloques) || bloques.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'text-center text-muted py-4';
+        td.textContent = 'No tienes bloques de entrenamiento registrados. ¡Crea el primero!';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    // Caso: Hay datos, iteramos para construir las filas
+    bloques.forEach(bloque => {
+        const tr = document.createElement('tr');
+
+        // Columna 1: Nombre y Descripción
+        const tdNombre = document.createElement('td');
+        const strongNombre = document.createElement('strong');
+        strongNombre.textContent = bloque.nombre;
+        tdNombre.appendChild(strongNombre);
+        
+        if (bloque.descripcion) {
+            const br = document.createElement('br');
+            const smallDesc = document.createElement('small');
+            smallDesc.className = 'text-muted';
+            // Truncamos la descripción si es muy larga
+            smallDesc.textContent = bloque.descripcion.length > 50 
+                ? bloque.descripcion.substring(0, 50) + '...' 
+                : bloque.descripcion;
+            tdNombre.appendChild(br);
+            tdNombre.appendChild(smallDesc);
+        }
+        tr.appendChild(tdNombre);
+
+        // Columna 2: Tipo
+        const tdTipo = document.createElement('td');
+        const badgeTipo = document.createElement('span');
+        badgeTipo.className = 'badge bg-secondary';
+        badgeTipo.textContent = bloque.tipo || 'General';
+        tdTipo.appendChild(badgeTipo);
+        tr.appendChild(tdTipo);
+
+        // Columna 3: Duración Estimada
+        const tdDuracion = document.createElement('td');
+        tdDuracion.textContent = bloque.duracion_estimada ? `${bloque.duracion_estimada} min` : '-';
+        tr.appendChild(tdDuracion);
+
+        // Columna 4: Zonas (Potencia / Pulso)
+        const tdZonas = document.createElement('td');
+        const smallZonas = document.createElement('small');
+        let txtZonas = '';
+        if (bloque.potencia_pct_min && bloque.potencia_pct_max) {
+            txtZonas += `${bloque.potencia_pct_min}% - ${bloque.potencia_pct_max}% FTP  `;
+        }
+        if (bloque.pulso_pct_max) {
+            txtZonas += `Max: ${bloque.pulso_pct_max}%`;
+        }
+        smallZonas.textContent = txtZonas || 'Sin definir';
+        tdZonas.appendChild(smallZonas);
+        tr.appendChild(tdZonas);
+
+        // Columna 5: Botones de Acción
+        const tdAcciones = document.createElement('td');
+        tdAcciones.className = 'text-end';
+        
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group btn-group-sm';
+
+        const btnVer = document.createElement('button');
+        btnVer.className = 'btn btn-outline-info';
+        btnVer.textContent = 'Ver';
+        btnVer.addEventListener('click', () => {
+            showToast(`Detalles del bloque (ID: ${bloque.id}) en construcción.`, "info");
+        });
+
+        const btnEliminar = document.createElement('button');
+        btnEliminar.className = 'btn btn-outline-danger';
+        btnEliminar.textContent = 'Borrar';
+        btnEliminar.addEventListener('click', () => {
+            showToast(`Lógica de eliminación (ID: ${bloque.id}) en la V9.`, "warning");
+        });
+
+        btnGroup.appendChild(btnVer);
+        btnGroup.appendChild(btnEliminar);
+        tdAcciones.appendChild(btnGroup);
+        tr.appendChild(tdAcciones);
+
+        // Finalmente, añadimos la fila completa al tbody
+        tbody.appendChild(tr);
+    });
 }
 
 /* ==========================================
