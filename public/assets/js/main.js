@@ -1,47 +1,83 @@
 /**
  * TrainBike - Frontend Application Entry Point
- * V3: Interceptor Fetch (Token Auth) y Cierre de Sesión (Logout)
+ * V4: Manejador Global de Errores y Feedback Visual (Toasts)
  */
 
 const API_BASE_URL = '/api'; 
 const appContainer = document.getElementById('app-container');
 const mainNav = document.getElementById('mainNav');
-const btnLogout = document.getElementById('btnLogout'); // Referencia al botón del menú
+const btnLogout = document.getElementById('btnLogout');
+
+/* ==========================================
+ * MÓDULO: UI FEEDBACK (TOASTS NATIVOS DOM)
+ * ========================================== */
+
+/**
+ * Muestra una notificación Toast utilizando estrictamente la API del DOM
+ * sin usar innerHTML para evitar inyecciones XSS.
+ * @param {string} message - El mensaje a mostrar
+ * @param {string} type - 'success', 'danger', 'warning', 'info'
+ */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    // Crear elementos
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast align-items-center text-white bg-${type} border-0 mb-2 fade-in`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+
+    const flexDiv = document.createElement('div');
+    flexDiv.className = 'd-flex';
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.className = 'toast-body';
+    bodyDiv.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close btn-close-white me-2 m-auto';
+    closeBtn.setAttribute('data-bs-dismiss', 'toast');
+    closeBtn.setAttribute('aria-label', 'Close');
+
+    // Ensamblar DOM de forma segura
+    flexDiv.appendChild(bodyDiv);
+    flexDiv.appendChild(closeBtn);
+    toastEl.appendChild(flexDiv);
+    container.appendChild(toastEl);
+
+    // Inicializar el Toast con Bootstrap
+    // Se requiere tener el script de Bootstrap bundle cargado en el HTML
+    const bsToast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    bsToast.show();
+
+    // Limpiar el DOM cuando se oculte
+    toastEl.addEventListener('hidden.bs.toast', () => {
+        toastEl.remove();
+    });
+}
 
 /* ==========================================
  * MÓDULO: FETCH WRAPPER (INTERCEPTOR)
  * ========================================== */
 
-/**
- * Envoltorio para la API fetch que inyecta automáticamente
- * el token de autorización en las cabeceras si existe.
- */
 async function fetchAPI(endpoint, options = {}) {
     const token = localStorage.getItem('auth_token');
-    
-    // Configuramos las cabeceras base requeridas por Laravel
     const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         ...options.headers
     };
 
-    // Si hay token, lo inyectamos en formato Bearer 
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = {
-        ...options,
-        headers
-    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
         
-        // Si el servidor responde 401 (No Autorizado) y no es login/registro, forzamos cierre
         if (response.status === 401 && endpoint !== '/login' && endpoint !== '/register') {
-            console.warn("Token expirado o inválido. Cerrando sesión...");
+            showToast("Sesión expirada. Por favor, vuelve a iniciar sesión.", "warning");
             forceLogout();
             throw new Error("Sesión expirada");
         }
@@ -49,7 +85,7 @@ async function fetchAPI(endpoint, options = {}) {
         return response;
     } catch (error) {
         console.error(`Error en fetchAPI [${endpoint}]:`, error);
-        throw error; // Propagamos el error para manejarlo en la vista
+        throw error; 
     }
 }
 
@@ -78,25 +114,21 @@ function clearAppContainer() {
  * MÓDULO: AUTENTICACIÓN (LOGIN, REGISTER, LOGOUT)
  * ========================================== */
 
-// Event listener global para el botón de cerrar sesión
-// Usamos { once: true } en el listener no es necesario si lo definimos una vez fuera, 
-// pero como initApp se llama varias veces, mejor asignarlo de forma segura:
-btnLogout.replaceWith(btnLogout.cloneNode(true)); // Limpia listeners previos
+btnLogout.replaceWith(btnLogout.cloneNode(true)); 
 document.getElementById('btnLogout').addEventListener('click', handleLogout);
 
 async function handleLogout() {
     try {
-        // Notificamos al servidor para que destruya el token en la BBDD [cite: 141, 185]
         await fetchAPI('/logout', { method: 'POST' });
+        showToast("Has cerrado sesión correctamente.", "info");
     } catch (error) {
-        console.warn("El servidor no pudo procesar el logout, limpiando cliente localmente.");
+        console.warn("Logout local ejecutado.");
     } finally {
         forceLogout();
     }
 }
 
 function forceLogout() {
-    // Borramos el token y reiniciamos el estado visual
     localStorage.removeItem('auth_token');
     initApp();
 }
@@ -129,7 +161,6 @@ function renderRegister() {
     appContainer.appendChild(clone);
 }
 
-// Fíjate que ahora usamos el `fetch` normal aquí porque estas rutas son públicas
 async function handleLoginSubmit(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -145,12 +176,13 @@ async function handleLoginSubmit(e) {
 
         if (response.ok && data.access_token) {
             localStorage.setItem('auth_token', data.access_token);
+            showToast(`¡Bienvenido de nuevo!`, "success");
             initApp();
         } else {
-            alert(data.message || 'Error en credenciales.');
+            showToast(data.message || 'Error en credenciales.', "danger");
         }
     } catch (error) {
-        alert("Error de conexión.");
+        showToast("Error de conexión con el servidor.", "danger");
     }
 }
 
@@ -176,12 +208,13 @@ async function handleRegisterSubmit(e) {
 
         if (response.ok && data.access_token) {
             localStorage.setItem('auth_token', data.access_token);
+            showToast("¡Cuenta creada con éxito!", "success");
             initApp();
         } else {
-            alert(data.message || 'Error en el registro.');
+            showToast(data.message || 'Error en el registro. Revisa los datos.', "danger");
         }
     } catch (error) {
-        alert("Error de conexión.");
+        showToast("Error de conexión con el servidor.", "danger");
     }
 }
 
