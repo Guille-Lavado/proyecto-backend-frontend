@@ -1,44 +1,43 @@
 /**
  * TrainBike - Frontend Application Entry Point
- * V1: Maquetación y control del DOM para Autenticación
+ * V2: Lógica de Autenticación (Login / Register con Fetch API)
  */
 
-const API_BASE_URL = '/api'; // Como estamos en el mismo servidor Laravel, usamos ruta relativa
+const API_BASE_URL = '/api'; 
 const appContainer = document.getElementById('app-container');
 const mainNav = document.getElementById('mainNav');
 
+/**
+ * Función inicializadora.
+ */
 function initApp() {
     const token = localStorage.getItem('auth_token');
 
     if (!token) {
-        // Si no hay token, renderizamos la pantalla de Login
+        // Ocultar menú si venimos de un logout (que haremos más adelante)
+        mainNav.classList.add('d-none');
         renderLogin();
     } else {
+        // Mostrar menú y cargar vista por defecto
         mainNav.classList.remove('d-none');
         setupNavigation();
-        renderPlaceholder("Bienvenido a TrainBike. (Vistas en desarrollo)");
+        renderPlaceholder("Bienvenido a TrainBike. Selecciona una opción del menú.");
     }
 }
 
-/**
- * Limpia el contenedor principal de forma segura.
- * Alternativa moderna y segura a appContainer.innerHTML = ''
- */
 function clearAppContainer() {
     appContainer.replaceChildren(); 
 }
 
-/**
- * Renderiza la vista de Inicio de Sesión usando la etiqueta <template>
- */
+/* ==========================================
+ * MÓDULO: AUTENTICACIÓN (LOGIN & REGISTER)
+ * ========================================== */
+
 function renderLogin() {
     clearAppContainer();
-    
     const template = document.getElementById('tpl-login');
-    // Clonamos el contenido del template en memoria
     const clone = template.content.cloneNode(true);
 
-    // Añadimos los event listeners a los elementos del nodo clonado antes de insertarlo
     const linkRegister = clone.getElementById('link-register');
     linkRegister.addEventListener('click', (e) => {
         e.preventDefault();
@@ -46,22 +45,14 @@ function renderLogin() {
     });
 
     const formLogin = clone.getElementById('form-login');
-    formLogin.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // En la V2 añadiremos la petición fetch aquí
-        console.log("Formulario de login enviado (Pendiente de lógica fetch)");
-    });
+    // NUEVO: Asignamos el manejador del submit para el Login
+    formLogin.addEventListener('submit', handleLoginSubmit);
 
-    // Finalmente, insertamos el nodo clonado en el DOM
     appContainer.appendChild(clone);
 }
 
-/**
- * Renderiza la vista de Registro usando la etiqueta <template>
- */
 function renderRegister() {
     clearAppContainer();
-
     const template = document.getElementById('tpl-register');
     const clone = template.content.cloneNode(true);
 
@@ -72,22 +63,105 @@ function renderRegister() {
     });
 
     const formRegister = clone.getElementById('form-register');
-    formRegister.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // En la V2 añadiremos la petición fetch aquí
-        console.log("Formulario de registro enviado (Pendiente de lógica fetch)");
-    });
+    // NUEVO: Asignamos el manejador del submit para el Registro
+    formRegister.addEventListener('submit', handleRegisterSubmit);
 
     appContainer.appendChild(clone);
 }
 
-// (Mantenemos setupNavigation y renderPlaceholder de la V0 aquí abajo)
+/**
+ * Procesa el envío del formulario de Login usando Fetch
+ */
+async function handleLoginSubmit(e) {
+    e.preventDefault(); // Evitamos la recarga de la página
+
+    // Capturamos los valores del DOM de forma segura
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.access_token) {
+            // Guardamos el token para futuras peticiones
+            localStorage.setItem('auth_token', data.access_token);
+            // Reiniciamos la app para que detecte el token y muestre el menú
+            initApp();
+        } else {
+            // Manejo de errores básico (En la V4 lo mejoraremos con Toasts visuales)
+            alert(data.message || 'Error en las credenciales. Revisa tu email y contraseña.');
+        }
+    } catch (error) {
+        console.error("Error en la petición de login:", error);
+        alert("Error de conexión con el servidor.");
+    }
+}
+
+/**
+ * Procesa el envío del formulario de Registro usando Fetch
+ */
+async function handleRegisterSubmit(e) {
+    e.preventDefault();
+
+    // Construimos el objeto con los datos del ciclista requeridos en la práctica
+    const payload = {
+        nombre: document.getElementById('reg-nombre').value,
+        apellidos: document.getElementById('reg-apellidos').value,
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
+        fecha_nacimiento: document.getElementById('reg-fecha').value,
+        peso: parseFloat(document.getElementById('reg-peso').value),
+        altura: parseFloat(document.getElementById('reg-altura').value)
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.access_token) {
+            localStorage.setItem('auth_token', data.access_token);
+            initApp();
+        } else {
+            alert(data.message || 'Error en el registro. Verifica los datos introducidos.');
+            console.log("Detalles del error de validación:", data.errors);
+        }
+    } catch (error) {
+        console.error("Error en la petición de registro:", error);
+        alert("Error de conexión con el servidor.");
+    }
+}
+
+/* ==========================================
+ * MÓDULO: NAVEGACIÓN Y UTILIDADES
+ * ========================================== */
+
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
+        // Prevenir añadir listeners duplicados si setupNavigation se llama varias veces
+        const newLink = link.cloneNode(true);
+        link.parentNode.replaceChild(newLink, link);
+        
+        newLink.addEventListener('click', (e) => {
             e.preventDefault();
-            navLinks.forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
             renderPlaceholder(`Vista cargada: ${e.target.getAttribute('data-view').toUpperCase()}`);
         });
