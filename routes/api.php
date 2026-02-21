@@ -27,17 +27,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/bloque', [BloqueController::class, 'getAll']);
-    Route::post('/bloque/crear', [BloqueController::class, 'store']);
+    Route::post('/bloque', [BloqueController::class, 'store']);
     Route::get('/bloque/{id}', [BloqueController::class, 'show']);
-    Route::delete('/bloque/{id}/eliminar', [BloqueController::class, 'destroy']);
+    Route::delete('/bloque/{id}', [BloqueController::class, 'destroy']);
 
     Route::get('/plan', [PlanController::class, 'getAll']);
-    Route::post('/plan/crear', [PlanController::class, 'store']);
+    Route::post('/plan', [PlanController::class, 'store']);
     Route::put('/plan/{id}', [PlanController::class, 'update']);
     Route::delete('/plan/{id}', [PlanController::class, 'destroy']);
 
     Route::get('/sesion', [SesionController::class, 'getAll']);
-    Route::post('/sesion/crear', [SesionController::class, 'store']);
+    Route::post('/sesion', [SesionController::class, 'store']);
     Route::get('/sesion/{id}', [SesionController::class, 'show']);
     Route::delete('/sesion/{id}', [SesionController::class, 'destroy']);
 

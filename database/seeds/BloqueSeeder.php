@@ -12,6 +12,6 @@ class BloqueSeeder extends Seeder
      */
     public function run()
     {
-        factory(BloqueEntrenamiento::class, 3)->create();
+        factory(BloqueEntrenamiento::class, 50)->create();
     }
 }

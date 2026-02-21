@@ -17,7 +17,22 @@ class BloqueController extends Controller
     {
         $bloques = BloqueEntrenamiento::query()->orderBy('created_at', 'desc')->get();
 
-        return response()->json($bloques, 200);
+        $res_bloques = [];
+        foreach ($bloques as $bloque) {
+            $res_bloques[] = [
+                "id" => $bloque["id"],
+                "nombre" => $bloque["nombre"],
+                "descripcion" => $bloque["descripcion"],
+                "tipo" => $bloque["tipo"],
+                "duracion_estimada" => $bloque["duracion_estimada"],
+                "potencia_pct_min" => $bloque["potencia_pct_min"],
+                "potencia_pct_max" => $bloque["potencia_pct_max"],
+                "pulso_pct_max" => $bloque["pulso_pct_max"],
+                "pulso_reserva_pct" => $bloque["pulso_reserva_pct"],
+            ];
+        }
+
+        return response()->json($res_bloques, 200);
     }
 
     /**
