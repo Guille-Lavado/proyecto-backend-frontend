@@ -219,7 +219,7 @@ async function handleRegisterSubmit(e) {
 }
 
 /* ==========================================
- * MÓDULO: NAVEGACIÓN Y UTILIDADES
+ * MÓDULO: NAVEGACIÓN Y ENRUTAMIENTO SPA
  * ========================================== */
 
 function setupNavigation() {
@@ -232,10 +232,58 @@ function setupNavigation() {
             e.preventDefault();
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             e.target.classList.add('active');
-            renderPlaceholder(`Vista cargada: ${e.target.getAttribute('data-view').toUpperCase()}`);
+            
+            const view = e.target.getAttribute('data-view');
+            router(view); // Llamamos a nuestro enrutador básico
         });
     });
 }
+
+/**
+ * Enrutador básico de la aplicación SPA
+ */
+function router(view) {
+    switch(view) {
+        case 'bloques':
+            renderBloquesList();
+            break;
+        case 'planes':
+        case 'sesiones':
+        case 'resultados':
+        case 'sesion-plan':
+            renderPlaceholder(`Vista en construcción: ${view.toUpperCase()}`);
+            break;
+        default:
+            renderPlaceholder("Bienvenido a TrainBike. Selecciona una opción del menú.");
+    }
+}
+
+/* ==========================================
+ * MÓDULO: VISTAS DE BLOQUES DE ENTRENAMIENTO
+ * ========================================== */
+
+/**
+ * Renderiza la interfaz base para el listado de bloques.
+ */
+function renderBloquesList() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-bloques-list');
+    const clone = template.content.cloneNode(true);
+
+    // Capturamos el botón de crear antes de insertarlo
+    const btnNuevo = clone.getElementById('btn-nuevo-bloque');
+    btnNuevo.addEventListener('click', () => {
+        showToast("Formulario de creación en desarrollo (V7)", "info");
+    });
+
+    appContainer.appendChild(clone);
+
+    // Aquí llamaremos a la función fetchBloques() en la V6 para llenar la tabla
+}
+
+/* ==========================================
+ * UTILIDADES COMUNES
+ * ========================================== */
 
 function renderPlaceholder(text) {
     clearAppContainer();

@@ -131,6 +131,43 @@
         </div>
     </template>
 
+    <template id="tpl-bloques-list">
+        <div class="fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">🧩 Bloques de Entrenamiento</h2>
+                <button id="btn-nuevo-bloque" class="btn btn-primary">
+                    + Añadir Bloque
+                </button>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Duración Est.</th>
+                                    <th>Zonas (Potencia / Pulso)</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bloques-tbody">
+                                <tr id="bloques-loading">
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Cargando bloques...
+                                    </td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
