@@ -168,6 +168,85 @@
         </div>
     </template>
 
+    <template id="tpl-bloque-form">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-8 mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                    <h2 class="h3 mb-0" id="bloque-form-title">⚡ Nuevo Bloque</h2>
+                    <button id="btn-cancelar-bloque" class="btn btn-outline-secondary">
+                        Volver al listado
+                    </button>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <form id="form-bloque">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label for="bq-nombre" class="form-label text-dark fw-bold">Nombre del Bloque *</label>
+                                    <input type="text" class="form-control" id="bq-nombre" required placeholder="Ej: Calentamiento progresivo">
+                                </div>
+                                <div class="col-md-4 mt-3 mt-md-0">
+                                    <label for="bq-tipo" class="form-label text-dark fw-bold">Tipo *</label>
+                                    <select class="form-select" id="bq-tipo" required>
+                                        <option value="" disabled selected>Selecciona...</option>
+                                        <option value="Calentamiento">Calentamiento</option>
+                                        <option value="Activo">Activo (Series)</option>
+                                        <option value="Recuperación">Recuperación</option>
+                                        <option value="Enfriamiento">Enfriamiento</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="bq-descripcion" class="form-label text-dark fw-bold">Descripción / Instrucciones</label>
+                                <textarea class="form-control" id="bq-descripcion" rows="2" placeholder="Ej: Rodaje suave subiendo cadencia poco a poco..."></textarea>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="mb-3 text-secondary">Métricas Objetivo (Opcional)</h5>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="bq-duracion" class="form-label">Duración Est. (min)</label>
+                                    <input type="number" class="form-control" id="bq-duracion" min="1" max="300">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="bq-pot-min" class="form-label">% FTP Mínimo</label>
+                                    <input type="number" class="form-control" id="bq-pot-min" min="0" max="250" placeholder="Ej: 50">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="bq-pot-max" class="form-label">% FTP Máximo</label>
+                                    <input type="number" class="form-control" id="bq-pot-max" min="0" max="300" placeholder="Ej: 75">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="bq-pulso-max" class="form-label">% Pulso Máximo</label>
+                                    <input type="number" class="form-control" id="bq-pulso-max" min="0" max="100" placeholder="Ej: 70">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bq-pulso-res" class="form-label">% Pulso de Reserva</label>
+                                    <input type="number" class="form-control" id="bq-pulso-res" min="0" max="100">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="bq-comentario" class="form-label">Comentario Privado</label>
+                                <input type="text" class="form-control" id="bq-comentario">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">Guardar Bloque de Entrenamiento</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

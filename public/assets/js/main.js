@@ -271,14 +271,12 @@ function renderBloquesList() {
     const clone = template.content.cloneNode(true);
 
     const btnNuevo = clone.getElementById('btn-nuevo-bloque');
+    // CAMBIO AQUÍ: Ahora llama a la nueva función en lugar del Toast
     btnNuevo.addEventListener('click', () => {
-        // En la V7 cambiaremos esto para que cargue el formulario
-        showToast("Cargando formulario de creación (V7)...", "info");
+        renderBloqueForm(); 
     });
 
     appContainer.appendChild(clone);
-
-    // Una vez el esqueleto está en el DOM, disparamos la petición asíncrona
     fetchBloques();
 }
 
@@ -410,6 +408,34 @@ function renderBloquesRows(bloques) {
         // Finalmente, añadimos la fila completa al tbody
         tbody.appendChild(tr);
     });
+}
+
+/**
+ * Renderiza el formulario para crear un nuevo Bloque de Entrenamiento.
+ */
+function renderBloqueForm() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-bloque-form');
+    const clone = template.content.cloneNode(true);
+
+    // Botón para volver al listado sin guardar
+    const btnCancelar = clone.getElementById('btn-cancelar-bloque');
+    btnCancelar.addEventListener('click', () => {
+        renderBloquesList();
+    });
+
+    // Capturar el evento Submit del formulario
+    const formBloque = clone.getElementById('form-form-bloque') || clone.getElementById('form-bloque');
+    formBloque.addEventListener('submit', (e) => {
+        e.preventDefault(); // Evitamos que el navegador recargue la página
+        
+        // El navegador ya ha validado los 'required', 'min' y 'max' por nosotros
+        showToast("Formulario validado correctamente. En la V8 lo enviaremos a la API.", "success");
+        
+        // Aquí llamaremos a handleBloqueSubmit() en la V8
+    });
+
+    appContainer.appendChild(clone);
 }
 
 /* ==========================================
