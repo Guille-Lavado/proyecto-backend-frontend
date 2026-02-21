@@ -389,16 +389,19 @@ function renderBloquesRows(bloques) {
         const btnVer = document.createElement('button');
         btnVer.className = 'btn btn-outline-info';
         btnVer.textContent = 'Ver';
+        // CAMBIO: Ahora llama a la nueva función fetchBloqueDetalle
         btnVer.addEventListener('click', () => {
-            showToast(`Detalles del bloque (ID: ${bloque.id}) en construcción.`, "info");
+            fetchBloqueDetalle(bloque.id);
         });
 
         const btnEliminar = document.createElement('button');
         btnEliminar.className = 'btn btn-outline-danger';
         btnEliminar.textContent = 'Borrar';
+        // CAMBIO: Ahora llama a la nueva función deleteBloque
         btnEliminar.addEventListener('click', () => {
-            showToast(`Lógica de eliminación (ID: ${bloque.id}) en la V9.`, "warning");
+            deleteBloque(bloque.id, bloque.nombre);
         });
+        // ...
 
         btnGroup.appendChild(btnVer);
         btnGroup.appendChild(btnEliminar);
@@ -489,6 +492,93 @@ async function handleBloqueSubmit(e) {
         }
     } catch (error) {
         showToast("Error de red al conectar con el servidor.", "danger");
+    }
+}
+
+/**
+ * Obtiene los detalles de un bloque específico por su ID.
+ */
+async function fetchBloqueDetalle(id) {
+    try {
+        const response = await fetchAPI(`/bloque/${id}`);
+        const bloque = await response.json();
+        
+        if (response.ok) {
+            renderBloqueDetalle(bloque);
+        } else {
+            showToast("No se pudo cargar el bloque.", "danger");
+        }
+    } catch (error) {
+        showToast("Error al obtener los detalles del servidor.", "danger");
+    }
+}
+
+/**
+ * Renderiza la vista de detalle mapeando los datos de forma segura.
+ */
+function renderBloqueDetalle(bloque) {
+    clearAppContainer();
+    const template = document.getElementById('tpl-bloque-detalle');
+    const clone = template.content.cloneNode(true);
+
+    // Botón volver
+    clone.getElementById('btn-volver-detalle').addEventListener('click', () => {
+        renderBloquesList();
+    });
+
+    // Inyección segura de datos con textContent
+    clone.getElementById('det-nombre').textContent = bloque.nombre;
+    clone.getElementById('det-tipo').textContent = bloque.tipo || 'General';
+    clone.getElementById('det-desc').textContent = bloque.descripcion || 'Sin descripción';
+    
+    clone.getElementById('det-duracion').textContent = bloque.duracion_estimada 
+        ? `${bloque.duracion_estimada} minutos` 
+        : 'No especificada';
+
+    // Formatear Potencia
+    let txtPotencia = 'No definidas';
+    if (bloque.potencia_pct_min && bloque.potencia_pct_max) {
+        txtPotencia = `Entre ${bloque.potencia_pct_min}% y ${bloque.potencia_pct_max}% del FTP`;
+    }
+    clone.getElementById('det-potencia').textContent = txtPotencia;
+
+    // Formatear Pulso
+    let txtPulso = 'No definidas';
+    if (bloque.pulso_pct_max) {
+        txtPulso = `Hasta ${bloque.pulso_pct_max}% de la Frecuencia Cardíaca Máxima`;
+    }
+    clone.getElementById('det-pulso').textContent = txtPulso;
+
+    clone.getElementById('det-comentario').textContent = bloque.comentario || 'Ninguno';
+
+    appContainer.appendChild(clone);
+}
+
+/**
+ * Lógica para eliminar un bloque tras confirmación del usuario.
+ */
+async function deleteBloque(id, nombre) {
+    // Usamos el confirm nativo del navegador para evitar borrados accidentales
+    const seguro = confirm(`¿Estás completamente seguro de que deseas eliminar el bloque "${nombre}"?\nEsta acción no se puede deshacer.`);
+    
+    if (!seguro) return;
+
+    try {
+        // Ejecutamos la petición con el método DELETE a la ruta exigida
+        const response = await fetchAPI(`/bloque/${id}/eliminar`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast(`Bloque "${nombre}" eliminado.`, "success");
+            // Recargamos el listado para que desaparezca de la tabla visualmente
+            renderBloquesList();
+        } else {
+            const data = await response.json();
+            showToast(data.message || "Error al intentar eliminar el bloque.", "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión al intentar eliminar.", "danger");
     }
 }
 

@@ -247,6 +247,51 @@
         </div>
     </template>
 
+    <template id="tpl-bloque-detalle">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-8 mb-5 mt-3">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">🔍 Detalles del Bloque</h4>
+                        <button id="btn-volver-detalle" class="btn btn-sm btn-outline-light">Volver</button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Nombre:</div>
+                            <div class="col-sm-8 text-dark" id="det-nombre"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Tipo:</div>
+                            <div class="col-sm-8"><span class="badge bg-secondary" id="det-tipo"></span></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Descripción:</div>
+                            <div class="col-sm-8" id="det-desc"></div>
+                        </div>
+                        <hr>
+                        <h5 class="text-secondary mb-3">Métricas Estimadas</h5>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Duración:</div>
+                            <div class="col-sm-8" id="det-duracion"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Zonas de Potencia:</div>
+                            <div class="col-sm-8" id="det-potencia"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Zonas de Pulso:</div>
+                            <div class="col-sm-8" id="det-pulso"></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 text-muted fw-bold">Comentario Interno:</div>
+                            <div class="col-sm-8 fst-italic" id="det-comentario"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
