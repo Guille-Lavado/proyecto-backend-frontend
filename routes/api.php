@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/sesion/{id}', [SesionController::class, 'destroy']);
 
     Route::get("/resultado", [EntrenamientoController::class, "getAll"]);
-    Route::post("/resultado", [EntrenamientoController::class, "store"]);
+    Route::post("/resultado/crear", [EntrenamientoController::class, "store"]);
     Route::get("/resultado/{id}", [EntrenamientoController::class, "show"]);
 
     Route::get('/sesionPlan', [PlanController::class, 'getSesionPlan']);

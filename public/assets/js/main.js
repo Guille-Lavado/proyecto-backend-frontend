@@ -262,10 +262,13 @@ function router(view) {
             renderSesionesList();
             break;
         case 'sesion-plan':
-            renderSesionPlanList(); // NUEVO
+            renderSesionPlanList();
             break;
+        // case 'sesion-bloque': // NUEVO: La ruta del menú
+        //     renderSesionBloqueList();
+        //     break;
         case 'resultados':
-            renderPlaceholder(`Vista en construcción: ${view.toUpperCase()}`);
+            renderResultadosList();
             break;
         default:
             renderPlaceholder("Bienvenido a TrainBike. Selecciona una opción del menú.");
@@ -1350,6 +1353,252 @@ async function handleSesionPlanSubmit(e) {
         }
     } catch (error) {
         showToast("Error de conexión al guardar.", "danger");
+    }
+}
+
+// /* ==========================================
+//  * MÓDULO: SESIÓN-BLOQUE (TABLA PIVOTE)
+//  * ========================================== */
+
+// function renderSesionBloqueList() {
+//     clearAppContainer();
+//     const template = document.getElementById('tpl-sesion-bloque');
+//     const clone = template.content.cloneNode(true);
+
+//     clone.getElementById('form-sesion-bloque').addEventListener('submit', handleSesionBloqueSubmit);
+
+//     appContainer.appendChild(clone);
+
+//     // Disparamos peticiones en paralelo para cargar los selects y la tabla
+//     fetchSelectDataPivot();
+//     fetchTablaPivot();
+// }
+
+// /**
+//  * Carga las sesiones y los bloques para rellenar los <select> del formulario.
+//  */
+// async function fetchSelectDataPivot() {
+//     const selSesion = document.getElementById('pivot-sesion');
+//     const selBloque = document.getElementById('pivot-bloque');
+//     if (!selSesion || !selBloque) return;
+
+//     try {
+//         // Promesa doble para traer ambos catálogos a la vez
+//         const [resSesiones, resBloques] = await Promise.all([
+//             fetchAPI('/sesion?offset=0&limit=100'), // Forzamos un límite alto temporalmente
+//             fetchAPI('/bloque')
+//         ]);
+
+//         const sesiones = await resSesiones.json();
+//         const bloques = await resBloques.json();
+
+//         // Rellenar Sesiones
+//         selSesion.replaceChildren();
+//         const optSDef = document.createElement('option');
+//         optSDef.value = ""; optSDef.disabled = true; optSDef.selected = true;
+//         optSDef.textContent = "Elige una sesión...";
+//         selSesion.appendChild(optSDef);
+
+//         if (Array.isArray(sesiones)) {
+//             sesiones.forEach(s => {
+//                 const opt = document.createElement('option');
+//                 opt.value = s.id; opt.textContent = s.nombre;
+//                 selSesion.appendChild(opt);
+//             });
+//         }
+
+//         // Rellenar Bloques
+//         selBloque.replaceChildren();
+//         const optBDef = document.createElement('option');
+//         optBDef.value = ""; optBDef.disabled = true; optBDef.selected = true;
+//         optBDef.textContent = "Elige un bloque...";
+//         selBloque.appendChild(optBDef);
+
+//         if (Array.isArray(bloques)) {
+//             bloques.forEach(b => {
+//                 const opt = document.createElement('option');
+//                 opt.value = b.id; opt.textContent = b.nombre;
+//                 selBloque.appendChild(opt);
+//             });
+//         }
+//     } catch (error) {
+//         showToast("Error al cargar los catálogos.", "danger");
+//     }
+// }
+
+// /**
+//  * Carga las relaciones existentes y las pinta en la tabla.
+//  */
+// async function fetchTablaPivot() {
+//     const tbody = document.getElementById('pivot-tbody');
+//     if (!tbody) return;
+
+//     try {
+//         const response = await fetchAPI('/sesionbloque');
+//         const relaciones = await response.json();
+        
+//         tbody.replaceChildren();
+
+//         if (!Array.isArray(relaciones) || relaciones.length === 0) {
+//             const tr = document.createElement('tr');
+//             const td = document.createElement('td');
+//             td.colSpan = 4; td.className = 'text-center text-muted py-4';
+//             td.textContent = 'No hay bloques asignados a ninguna sesión actualmente.';
+//             tr.appendChild(td); tbody.appendChild(tr);
+//             return;
+//         }
+
+//         relaciones.forEach(rel => {
+//             const tr = document.createElement('tr');
+
+//             // ID
+//             const tdId = document.createElement('td');
+//             tdId.className = 'text-muted small';
+//             tdId.textContent = `#${rel.id}`;
+//             tr.appendChild(tdId);
+
+//             // Sesión
+//             const tdSesion = document.createElement('td');
+//             tdSesion.className = 'fw-bold';
+//             // Asumimos que el backend envía los nombres o al menos los IDs
+//             tdSesion.textContent = rel.sesion ? rel.sesion.nombre : `Sesión ID: ${rel.id_sesion}`;
+//             tr.appendChild(tdSesion);
+
+//             // Bloque
+//             const tdBloque = document.createElement('td');
+//             tdBloque.textContent = rel.bloque ? rel.bloque.nombre : `Bloque ID: ${rel.id_bloque}`;
+//             tr.appendChild(tdBloque);
+
+//             // Acción: Borrar Relación (DELETE /sesionbloque/{id})
+//             const tdAccion = document.createElement('td');
+//             tdAccion.className = 'text-end';
+//             const btnDel = document.createElement('button');
+//             btnDel.className = 'btn btn-sm btn-outline-danger';
+//             btnDel.textContent = 'Desvincular';
+//             btnDel.addEventListener('click', () => deleteSesionBloque(rel.id));
+//             tdAccion.appendChild(btnDel);
+//             tr.appendChild(tdAccion);
+
+//             tbody.appendChild(tr);
+//         });
+//     } catch (error) {
+//         tbody.replaceChildren();
+//         const tr = document.createElement('tr');
+//         const td = document.createElement('td');
+//         td.colSpan = 4; td.className = 'text-center text-danger py-4';
+//         td.textContent = 'No se pudo cargar la tabla de relaciones (¿Endpoint GET /sesionbloque implementado?)';
+//         tr.appendChild(td); tbody.appendChild(tr);
+//     }
+// }
+
+// /**
+//  * Vincula un Bloque a una Sesión (POST).
+//  */
+// async function handleSesionBloqueSubmit(e) {
+//     e.preventDefault();
+
+//     const payload = {
+//         id_sesion: parseInt(document.getElementById('pivot-sesion').value),
+//         id_bloque: parseInt(document.getElementById('pivot-bloque').value)
+//     };
+
+//     try {
+//         const response = await fetchAPI('/sesionbloque', {
+//             method: 'POST',
+//             body: JSON.stringify(payload)
+//         });
+
+//         const data = await response.json(); // <-- AHORA CAPTURAMOS EL ERROR REAL
+
+//         if (response.ok) {
+//             showToast("Bloque vinculado a la sesión con éxito.", "success");
+//             fetchTablaPivot(); 
+//         } else {
+//             console.error("🕵️ ERROR DE LARAVEL:", data); // Lo mandamos a la consola
+//             showToast(data.message || "Error al vincular el bloque. Mira la consola (F12)", "danger");
+//         }
+//     } catch (error) {
+//         showToast("Error de red al intentar vincular.", "danger");
+//     }
+// }
+
+/* ==========================================
+ * MÓDULO: RESULTADOS (V19 - POST)
+ * ========================================== */
+
+function renderResultadosList() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-resultados-list');
+    const clone = template.content.cloneNode(true);
+    clone.getElementById('btn-nuevo-resultado').addEventListener('click', renderResultadoForm);
+    appContainer.appendChild(clone);
+    fetchResultados(); // Se implementará en la V20
+}
+
+function renderResultadoForm() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-resultado-form');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-cancelar-resultado').addEventListener('click', renderResultadosList);
+
+    // Actualizar visualmente el valor del RPE (Range input)
+    const rpeInput = clone.getElementById('re-rpe');
+    const rpeValue = clone.getElementById('rpe-value');
+    rpeInput.addEventListener('input', () => { rpeValue.textContent = rpeInput.value; });
+
+    clone.getElementById('form-resultado').addEventListener('submit', handleResultadoSubmit);
+    
+    appContainer.appendChild(clone);
+    fetchSesionesForSelect(); // Carga las sesiones para el desplegable
+}
+
+async function fetchSesionesForSelect() {
+    const select = document.getElementById('re-sesion');
+    try {
+        const response = await fetchAPI('/sesion?offset=0&limit=100');
+        const sesiones = await response.json();
+        select.replaceChildren();
+        sesiones.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id; opt.textContent = s.nombre;
+            select.appendChild(opt);
+        });
+    } catch (e) { showToast("Error al cargar sesiones", "danger"); }
+}
+
+async function handleResultadoSubmit(e) {
+    e.preventDefault();
+
+    // Sincronizamos los nombres de los campos con lo que pide el EntrenamientoController
+    const payload = {
+        id_ciclista: 1,
+        id_sesion: parseInt(document.getElementById('re-sesion').value),
+        fecha: document.getElementById('re-fecha').value,
+        duracion: parseInt(document.getElementById('re-duracion').value) || 0,
+        kilometros: 0,
+        potencia_media: parseInt(document.getElementById('re-potencia').value) || 0,
+        pulso_medio: parseInt(document.getElementById('re-pulso').value) || 0,
+        comentario: document.getElementById('re-comentarios').value || ""
+    };
+
+    try {
+        const response = await fetchAPI('/resultado/crear', { 
+            method: 'POST', 
+            body: JSON.stringify(payload) 
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast("✅ ¡Entrenamiento registrado!", "success");
+            renderResultadosList();
+        } else {
+            console.error("Detalle del error:", data);
+            showToast(data.message || "Error al guardar. Revisa los campos.", "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión con el servidor.", "danger");
     }
 }
 

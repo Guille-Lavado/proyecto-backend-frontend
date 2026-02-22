@@ -32,6 +32,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-view="sesion-plan">Sesión-Plan</a>
                     </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link" href="#" data-view="sesion-bloque">Sesión-Bloque</a>
+                    </li> -->
                 </ul>
                 <div class="d-flex">
                     <button id="btnLogout" class="btn btn-outline-danger btn-sm">Cerrar Sesión</button>
@@ -548,6 +551,170 @@
             <div class="col-md-5">
                 <label class="form-label small fw-bold">Descripción / Detalles</label>
                 <input type="text" class="form-control form-control-sm row-desc">
+            </div>
+        </div>
+    </template>
+
+    <!-- <template id="tpl-sesion-bloque">
+        <div class="fade-in pb-5">
+            <h2 class="h3 mb-4">🧩 Gestor de Sesiones y Bloques</h2>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-primary text-white fw-bold">
+                            + Añadir Bloque a Sesión
+                        </div>
+                        <div class="card-body">
+                            <form id="form-sesion-bloque">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Selecciona la Sesión *</label>
+                                    <select class="form-select" id="pivot-sesion" required>
+                                        <option value="" disabled selected>Cargando...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small">Selecciona el Bloque *</label>
+                                    <select class="form-select" id="pivot-bloque" required>
+                                        <option value="" disabled selected>Cargando...</option>
+                                    </select>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">Vincular</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID Relación</th>
+                                            <th>Sesión</th>
+                                            <th>Bloque Asignado</th>
+                                            <th class="text-end">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pivot-tbody">
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted" id="pivot-loading">
+                                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                Cargando estructura...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template> -->
+
+    <template id="tpl-resultados-list">
+        <div class="fade-in pb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">🏆 Resultados de Rendimiento</h2>
+                <button id="btn-nuevo-resultado" class="btn btn-primary">
+                    + Registrar Entrenamiento
+                </button>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sesión</th>
+                                    <th>Fecha Real</th>
+                                    <th>Esfuerzo (RPE)</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultados-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        Cargando historial de rendimiento...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-resultado-form">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-8 mb-5 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 mb-0">📈 Datos del Entrenamiento</h2>
+                    <button id="btn-cancelar-resultado" class="btn btn-outline-secondary">Volver</button>
+                </div>
+
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <form id="form-resultado">
+                            <div class="row mb-3">
+                                <div class="col-md-7">
+                                    <label class="form-label fw-bold">¿Qué sesión has completado? *</label>
+                                    <select class="form-select" id="re-sesion" required>
+                                        <option value="" disabled selected>Cargando sesiones...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label fw-bold">Fecha Realización *</label>
+                                    <input type="date" class="form-control" id="re-fecha" required>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h5 class="text-secondary mb-3">Métricas de Rendimiento</h5>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small">Duración Real (min) *</label>
+                                    <input type="number" class="form-control" id="re-duracion" required min="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Potencia Media (W)</label>
+                                    <input type="number" class="form-control" id="re-potencia">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Pulso Medio (ppm)</label>
+                                    <input type="number" class="form-control" id="re-pulso">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-danger">Percepción de Esfuerzo (RPE 1-10) *</label>
+                                <input type="range" class="form-range" id="re-rpe" min="1" max="10" step="1" value="5">
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Muy suave</span>
+                                    <span id="rpe-value" class="badge bg-danger fs-6">5</span>
+                                    <span>Máximo esfuerzo</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Comentarios / Sensaciones</label>
+                                <textarea class="form-control" id="re-comentarios" rows="3" placeholder="¿Cómo te has sentido?"></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">Guardar Resultado</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
