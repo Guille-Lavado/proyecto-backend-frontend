@@ -248,6 +248,8 @@ function router(view) {
             renderBloquesList();
             break;
         case 'planes':
+            renderPlanesList(); // AÑADIDO
+            break;
         case 'sesiones':
         case 'resultados':
         case 'sesion-plan':
@@ -579,6 +581,153 @@ async function deleteBloque(id, nombre) {
         }
     } catch (error) {
         showToast("Error de conexión al intentar eliminar.", "danger");
+    }
+}
+
+/* ==========================================
+ * MÓDULO: VISTAS DE PLANES DE ENTRENAMIENTO
+ * ========================================== */
+
+function renderPlanesList() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-planes-list');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-nuevo-plan').addEventListener('click', () => {
+        renderPlanForm();
+    });
+
+    appContainer.appendChild(clone);
+    fetchPlanes();
+}
+
+async function fetchPlanes() {
+    try {
+        const response = await fetchAPI('/plan');
+        const planes = await response.json();
+        renderPlanesRows(planes);
+    } catch (error) {
+        showToast("Error al obtener los planes.", "danger");
+    }
+}
+
+function renderPlanesRows(planes) {
+    const tbody = document.getElementById('planes-tbody');
+    if (!tbody) return;
+    tbody.replaceChildren();
+
+    if (!Array.isArray(planes) || planes.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'text-center text-muted py-4';
+        td.textContent = 'No hay planes registrados.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    planes.forEach(plan => {
+        const tr = document.createElement('tr');
+
+        // Columna 1: Nombre
+        const tdNombre = document.createElement('td');
+        const strongNombre = document.createElement('strong');
+        strongNombre.textContent = plan.nombre;
+        tdNombre.appendChild(strongNombre);
+        tr.appendChild(tdNombre);
+
+        // Columna 2: Fechas
+        const tdFechas = document.createElement('td');
+        tdFechas.textContent = `${plan.fecha_inicio} a ${plan.fecha_fin}`;
+        tr.appendChild(tdFechas);
+
+        // Columna 3: Objetivo
+        const tdObj = document.createElement('td');
+        tdObj.textContent = plan.objetivo || '-';
+        tr.appendChild(tdObj);
+
+        // Columna 4: Estado
+        const tdEstado = document.createElement('td');
+        const badge = document.createElement('span');
+        // Parseamos el booleano/entero
+        const activo = (plan.activo == 1 || plan.activo === true);
+        badge.className = activo ? 'badge bg-success' : 'badge bg-secondary';
+        badge.textContent = activo ? 'Activo' : 'Inactivo';
+        tdEstado.appendChild(badge);
+        tr.appendChild(tdEstado);
+
+        // Columna 5: Acciones (Editar/Eliminar en V11)
+        const tdAcciones = document.createElement('td');
+        tdAcciones.className = 'text-end';
+        
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'btn btn-sm btn-outline-warning me-1';
+        btnEditar.textContent = 'Editar';
+        btnEditar.addEventListener('click', () => {
+            showToast("Edición de planes en la V11", "info");
+        });
+
+        const btnBorrar = document.createElement('button');
+        btnBorrar.className = 'btn btn-sm btn-outline-danger';
+        btnBorrar.textContent = 'Borrar';
+        btnBorrar.addEventListener('click', () => {
+            showToast("Borrado de planes en la V11", "info");
+        });
+
+        tdAcciones.appendChild(btnEditar);
+        tdAcciones.appendChild(btnBorrar);
+        tr.appendChild(tdAcciones);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function renderPlanForm() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-plan-form');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-cancelar-plan').addEventListener('click', () => {
+        renderPlanesList();
+    });
+
+    clone.getElementById('form-plan').addEventListener('submit', handlePlanSubmit);
+    appContainer.appendChild(clone);
+}
+
+async function handlePlanSubmit(e) {
+    e.preventDefault();
+
+    // NOTA: Tu validador exige 'id_ciclista'. En un caso real se saca del perfil, 
+    // pero aquí mandaremos un 1 por defecto para no romper el backend.
+    const payload = {
+        id_ciclista: 1, 
+        nombre: document.getElementById('pl-nombre').value,
+        descripcion: document.getElementById('pl-descripcion').value || null,
+        fecha_inicio: document.getElementById('pl-fecha-inicio').value,
+        fecha_fin: document.getElementById('pl-fecha-fin').value,
+        objetivo: document.getElementById('pl-objetivo').value || null,
+        activo: document.getElementById('pl-activo').checked ? 1 : 0
+    };
+
+    try {
+        const response = await fetchAPI('/plan/crear', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast("Plan creado correctamente", "success");
+            renderPlanesList();
+        } else {
+            console.error("Errores:", data.errors);
+            showToast(data.message || 'Error al guardar el plan.', "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión.", "danger");
     }
 }
 

@@ -292,6 +292,95 @@
         </div>
     </template>
 
+    <template id="tpl-planes-list">
+        <div class="fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">📅 Planes de Entrenamiento</h2>
+                <button id="btn-nuevo-plan" class="btn btn-primary">
+                    + Crear Plan
+                </button>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre del Plan</th>
+                                    <th>Fechas (Inicio - Fin)</th>
+                                    <th>Objetivo</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="planes-tbody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Cargando planes...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-plan-form">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-8 mb-5 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 mb-0">📝 Nuevo Plan</h2>
+                    <button id="btn-cancelar-plan" class="btn btn-outline-secondary">Volver</button>
+                </div>
+
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <form id="form-plan">
+                            <div class="mb-3">
+                                <label for="pl-nombre" class="form-label fw-bold">Nombre del Plan *</label>
+                                <input type="text" class="form-control" id="pl-nombre" required placeholder="Ej: Preparación Quebrantahuesos 2026">
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="pl-fecha-inicio" class="form-label fw-bold">Fecha de Inicio *</label>
+                                    <input type="date" class="form-control" id="pl-fecha-inicio" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="pl-fecha-fin" class="form-label fw-bold">Fecha de Fin *</label>
+                                    <input type="date" class="form-control" id="pl-fecha-fin" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="pl-objetivo" class="form-label fw-bold">Objetivo Principal</label>
+                                <input type="text" class="form-control" id="pl-objetivo" placeholder="Ej: Terminar en menos de 6h 30m">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="pl-descripcion" class="form-label">Descripción general</label>
+                                <textarea class="form-control" id="pl-descripcion" rows="3"></textarea>
+                            </div>
+
+                            <div class="form-check form-switch mb-4">
+                                <input class="form-check-input" type="checkbox" id="pl-activo" checked>
+                                <label class="form-check-label" for="pl-activo">Plan Activo</label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">Guardar Plan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
