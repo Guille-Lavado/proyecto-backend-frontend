@@ -861,36 +861,148 @@ function initIntersectionObserver() {
 }
 
 /**
- * Función puente (Mock) para V13. 
- * En la V14 aquí haremos el fetch real a la API.
+ * Realiza la petición GET paginada a la API y gestiona el flujo del scroll.
  */
 async function fetchSesionesPaginadas() {
+    // Evitamos peticiones dobles o si ya hemos llegado al final
     if (isFetchingSesiones || !hasMoreSesiones) return;
+    
     isFetchingSesiones = true;
 
     const sentinel = document.getElementById('scroll-sentinel');
-    sentinel.classList.remove('d-none'); // Mostramos el spinner de carga
+    const endMessage = document.getElementById('no-more-sesiones');
 
-    // Simulamos un retraso de red para ver el efecto visual
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Mostramos el spinner mientras esperamos a la red (excepto en la primera carga si queremos que sea limpia)
+    if (sesionesOffset > 0 && sentinel) {
+        sentinel.classList.remove('d-none');
+    }
 
-    showToast(`Scroll detectado. Preparando petición GET /sesion?offset=${sesionesOffset}&limit=${sesionesLimit}`, "info");
+    try {
+        // Ejecutamos la petición GET con los parámetros de consulta (Query Parameters) exigidos
+        const endpoint = `/sesion?offset=${sesionesOffset}&limit=${sesionesLimit}`;
+        const response = await fetchAPI(endpoint);
+        const sesiones = await response.json();
 
-    // En la V14 inyectaremos tarjetas aquí. Por ahora, forzamos altura para 
-    // que el centinela baje y podamos probar el scroll
+        if (response.ok) {
+            // Caso A: El backend nos devuelve un array vacío. Significa que ya no hay más datos.
+            if (sesiones.length === 0) {
+                hasMoreSesiones = false;
+                if (sentinel) sentinel.classList.add('d-none');
+                
+                // Si el offset es 0, es que el usuario no tiene ninguna sesión en total
+                if (sesionesOffset === 0) {
+                    const container = document.getElementById('sesiones-container');
+                    const div = document.createElement('div');
+                    div.className = 'col-12 text-center text-muted py-5 mt-4';
+                    div.textContent = 'No tienes ninguna sesión de entrenamiento planificada.';
+                    container.appendChild(div);
+                } else {
+                    // Si ya había cargado algo antes, mostramos el mensaje de "No hay más"
+                    if (endMessage) endMessage.classList.remove('d-none');
+                }
+            } 
+            // Caso B: Recibimos datos, los pintamos.
+            else {
+                renderSesionesCards(sesiones);
+                
+                // Actualizamos el puntero para el próximo scroll
+                sesionesOffset += sesionesLimit;
+
+                // Optimización: Si el servidor nos devolvió menos sesiones del límite que pedimos, 
+                // matemáticamente sabemos que es la última página.
+                if (sesiones.length < sesionesLimit) {
+                    hasMoreSesiones = false;
+                    if (sentinel) sentinel.classList.add('d-none');
+                    if (endMessage) endMessage.classList.remove('d-none');
+                }
+            }
+        } else {
+            showToast("Error al cargar las sesiones desde el servidor.", "danger");
+            if (sentinel) sentinel.classList.add('d-none');
+        }
+    } catch (error) {
+        console.error("Error en Scroll Infinito:", error);
+        showToast("Error de conexión al intentar cargar más datos.", "danger");
+        if (sentinel) sentinel.classList.add('d-none');
+    } finally {
+        // Liberamos el cerrojo para permitir futuras peticiones
+        isFetchingSesiones = false;
+    }
+}
+
+/**
+ * Recibe un array de sesiones y genera tarjetas (Cards) inyectándolas en la cuadrícula.
+ * Uso estricto de la API del DOM para evitar XSS.
+ */
+function renderSesionesCards(sesiones) {
     const container = document.getElementById('sesiones-container');
-    const dummyDiv = document.createElement('div');
-    dummyDiv.className = 'col-12 p-5 bg-white border rounded mb-3 text-center text-muted';
-    dummyDiv.style.minHeight = '600px'; // Forzamos altura para generar scroll vertical
-    dummyDiv.textContent = `Lote de sesiones cargado (Offset actual: ${sesionesOffset})`;
-    container.appendChild(dummyDiv);
+    if (!container) return;
 
-    // Preparamos los punteros para la siguiente página
-    sesionesOffset += sesionesLimit;
-    isFetchingSesiones = false;
-    
-    // Ocultamos el spinner de carga hasta el próximo scroll
-    //sentinel.classList.add('d-none');
+    sesiones.forEach(sesion => {
+        // Columna del Grid de Bootstrap
+        const col = document.createElement('div');
+        col.className = 'col-12 col-md-6 col-lg-4';
+
+        // Tarjeta principal
+        const card = document.createElement('div');
+        card.className = 'card h-100 shadow-sm border-0 fade-in';
+
+        // Cuerpo de la tarjeta
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body pb-2';
+
+        // Fila interna para Título y Badge de Estado
+        const headerRow = document.createElement('div');
+        headerRow.className = 'd-flex justify-content-between align-items-start mb-2';
+
+        const title = document.createElement('h5');
+        title.className = 'card-title fw-bold text-dark mb-0';
+        title.textContent = sesion.nombre;
+
+        const badge = document.createElement('span');
+        const completada = (sesion.completada == 1 || sesion.completada === true);
+        badge.className = completada ? 'badge bg-success' : 'badge bg-warning text-dark';
+        badge.textContent = completada ? 'Completada' : 'Pendiente';
+
+        headerRow.appendChild(title);
+        headerRow.appendChild(badge);
+
+        // Fecha
+        const dateSub = document.createElement('h6');
+        dateSub.className = 'card-subtitle mb-3 text-primary small fw-bold';
+        dateSub.textContent = `📅 ${sesion.fecha ? sesion.fecha.split(' ')[0] : 'Sin fecha'}`;
+
+        // Descripción
+        const desc = document.createElement('p');
+        desc.className = 'card-text text-muted small mb-0';
+        desc.textContent = sesion.descripcion || 'Sin descripción registrada.';
+
+        // Ensamblaje del cuerpo
+        cardBody.appendChild(headerRow);
+        cardBody.appendChild(dateSub);
+        cardBody.appendChild(desc);
+
+        // Footer con acciones (Se implementará Borrado en la V15)
+        const cardFooter = document.createElement('div');
+        cardFooter.className = 'card-footer bg-transparent border-0 pt-0 text-end';
+        
+        const btnEliminar = document.createElement('button');
+        btnEliminar.className = 'btn btn-sm btn-outline-danger';
+        btnEliminar.textContent = 'Eliminar';
+        btnEliminar.addEventListener('click', () => {
+            showToast(`La eliminación (ID: ${sesion.id}) se programará en la V15`, "warning");
+        });
+
+        cardFooter.appendChild(btnEliminar);
+
+        // Ensamblaje final de la tarjeta
+        card.appendChild(cardBody);
+        card.appendChild(cardFooter);
+        col.appendChild(card);
+        
+        // Inyectamos la columna en el contenedor principal del grid
+        container.appendChild(col);
+    });
 }
 
 /* ==========================================
