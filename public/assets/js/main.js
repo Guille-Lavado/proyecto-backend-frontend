@@ -248,9 +248,11 @@ function router(view) {
             renderBloquesList();
             break;
         case 'planes':
-            renderPlanesList(); // AÑADIDO
+            renderPlanesList();
             break;
         case 'sesiones':
+            renderSesionesList(); // NUEVO: Llamamos a la vista de sesiones
+            break;
         case 'resultados':
         case 'sesion-plan':
             renderPlaceholder(`Vista en construcción: ${view.toUpperCase()}`);
@@ -779,6 +781,31 @@ async function deletePlan(id, nombre) {
     } catch (error) {
         showToast("Error de conexión.", "danger");
     }
+}
+
+/* ==========================================
+ * MÓDULO: SESIONES DE ENTRENAMIENTO Y SCROLL INFINITO
+ * ========================================== */
+
+/**
+ * Renderiza la interfaz principal para listar las sesiones.
+ * Prepara el contenedor y el centinela para el scroll infinito.
+ */
+function renderSesionesList() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-sesiones-list');
+    const clone = template.content.cloneNode(true);
+
+    // Botón para crear nueva sesión (Lógica en V15)
+    clone.getElementById('btn-nueva-sesion').addEventListener('click', () => {
+        showToast("Formulario de creación de sesión en desarrollo (V15)", "info");
+    });
+
+    appContainer.appendChild(clone);
+
+    // Mensaje temporal para confirmar que la vista carga
+    // En la V13/V14 lo quitaremos e inicializaremos el IntersectionObserver
+    showToast("Interfaz de sesiones cargada. El scroll infinito se activará en la V13.", "info");
 }
 
 /* ==========================================

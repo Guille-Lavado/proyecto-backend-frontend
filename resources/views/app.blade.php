@@ -381,6 +381,31 @@
         </div>
     </template>
 
+    <template id="tpl-sesiones-list">
+        <div class="fade-in pb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">🚴 Sesiones de Entrenamiento</h2>
+                <button id="btn-nueva-sesion" class="btn btn-primary">
+                    + Planificar Sesión
+                </button>
+            </div>
+
+            <div class="row g-4" id="sesiones-container">
+                </div>
+
+            <div id="scroll-sentinel" class="text-center py-5 mt-3 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-muted mt-2">Cargando más entrenamientos...</p>
+            </div>
+
+            <div id="no-more-sesiones" class="text-center py-4 text-muted d-none">
+                <i class="fs-5">🏁 No hay más sesiones en tu historial.</i>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
