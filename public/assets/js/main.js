@@ -594,7 +594,7 @@ function renderPlanesList() {
     const clone = template.content.cloneNode(true);
 
     clone.getElementById('btn-nuevo-plan').addEventListener('click', () => {
-        renderPlanForm();
+        renderPlanForm(); // Llamamos sin argumentos = Modo Creación
     });
 
     appContainer.appendChild(clone);
@@ -630,34 +630,36 @@ function renderPlanesRows(planes) {
     planes.forEach(plan => {
         const tr = document.createElement('tr');
 
-        // Columna 1: Nombre
+        // Nombre
         const tdNombre = document.createElement('td');
         const strongNombre = document.createElement('strong');
         strongNombre.textContent = plan.nombre;
         tdNombre.appendChild(strongNombre);
         tr.appendChild(tdNombre);
 
-        // Columna 2: Fechas
+        // Fechas
         const tdFechas = document.createElement('td');
-        tdFechas.textContent = `${plan.fecha_inicio} a ${plan.fecha_fin}`;
+        // Extraemos solo la parte YYYY-MM-DD en caso de que vengan con horas
+        const fInicio = plan.fecha_inicio ? plan.fecha_inicio.split(' ')[0] : '';
+        const fFin = plan.fecha_fin ? plan.fecha_fin.split(' ')[0] : '';
+        tdFechas.textContent = `${fInicio} a ${fFin}`;
         tr.appendChild(tdFechas);
 
-        // Columna 3: Objetivo
+        // Objetivo
         const tdObj = document.createElement('td');
         tdObj.textContent = plan.objetivo || '-';
         tr.appendChild(tdObj);
 
-        // Columna 4: Estado
+        // Estado
         const tdEstado = document.createElement('td');
         const badge = document.createElement('span');
-        // Parseamos el booleano/entero
         const activo = (plan.activo == 1 || plan.activo === true);
         badge.className = activo ? 'badge bg-success' : 'badge bg-secondary';
         badge.textContent = activo ? 'Activo' : 'Inactivo';
         tdEstado.appendChild(badge);
         tr.appendChild(tdEstado);
 
-        // Columna 5: Acciones (Editar/Eliminar en V11)
+        // Acciones
         const tdAcciones = document.createElement('td');
         tdAcciones.className = 'text-end';
         
@@ -665,14 +667,14 @@ function renderPlanesRows(planes) {
         btnEditar.className = 'btn btn-sm btn-outline-warning me-1';
         btnEditar.textContent = 'Editar';
         btnEditar.addEventListener('click', () => {
-            showToast("Edición de planes en la V11", "info");
+            renderPlanForm(plan); // Pasamos el objeto plan = Modo Edición
         });
 
         const btnBorrar = document.createElement('button');
         btnBorrar.className = 'btn btn-sm btn-outline-danger';
         btnBorrar.textContent = 'Borrar';
         btnBorrar.addEventListener('click', () => {
-            showToast("Borrado de planes en la V11", "info");
+            deletePlan(plan.id, plan.nombre);
         });
 
         tdAcciones.appendChild(btnEditar);
@@ -683,26 +685,48 @@ function renderPlanesRows(planes) {
     });
 }
 
-function renderPlanForm() {
+/**
+ * Renderiza el formulario de Planes.
+ * @param {Object|null} plan - Si se pasa un plan, rellena los datos (Modo Edición).
+ */
+function renderPlanForm(plan = null) {
     clearAppContainer();
     const template = document.getElementById('tpl-plan-form');
     const clone = template.content.cloneNode(true);
+
+    // Adaptamos el título dinámicamente
+    const title = clone.querySelector('h2');
+    title.textContent = plan ? '✏️ Editar Plan' : '📝 Nuevo Plan';
+
+    // Si estamos editando, rellenamos los inputs del DOM
+    if (plan) {
+        clone.getElementById('pl-nombre').value = plan.nombre;
+        clone.getElementById('pl-fecha-inicio').value = plan.fecha_inicio.split(' ')[0];
+        clone.getElementById('pl-fecha-fin').value = plan.fecha_fin.split(' ')[0];
+        clone.getElementById('pl-objetivo').value = plan.objetivo || '';
+        clone.getElementById('pl-descripcion').value = plan.descripcion || '';
+        clone.getElementById('pl-activo').checked = (plan.activo == 1 || plan.activo === true);
+    }
 
     clone.getElementById('btn-cancelar-plan').addEventListener('click', () => {
         renderPlanesList();
     });
 
-    clone.getElementById('form-plan').addEventListener('submit', handlePlanSubmit);
+    const form = clone.getElementById('form-plan');
+    // Pasamos el ID al handler. Si es null, será un POST. Si hay ID, será un PUT.
+    form.addEventListener('submit', (e) => handlePlanSubmit(e, plan ? plan.id : null));
+
     appContainer.appendChild(clone);
 }
 
-async function handlePlanSubmit(e) {
+/**
+ * Procesa la creación (POST) o actualización (PUT) del plan.
+ */
+async function handlePlanSubmit(e, planId = null) {
     e.preventDefault();
 
-    // NOTA: Tu validador exige 'id_ciclista'. En un caso real se saca del perfil, 
-    // pero aquí mandaremos un 1 por defecto para no romper el backend.
     const payload = {
-        id_ciclista: 1, 
+        id_ciclista: 1, // Mantenido por si tu validador base lo exige
         nombre: document.getElementById('pl-nombre').value,
         descripcion: document.getElementById('pl-descripcion').value || null,
         fecha_inicio: document.getElementById('pl-fecha-inicio').value,
@@ -711,20 +735,46 @@ async function handlePlanSubmit(e) {
         activo: document.getElementById('pl-activo').checked ? 1 : 0
     };
 
+    // Lógica dinámica de endpoints según los requisitos del PDF
+    const method = planId ? 'PUT' : 'POST';
+    const endpoint = planId ? `/plan/${planId}` : '/plan/crear';
+
     try {
-        const response = await fetchAPI('/plan/crear', {
-            method: 'POST',
+        const response = await fetchAPI(endpoint, {
+            method: method,
             body: JSON.stringify(payload)
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            showToast("Plan creado correctamente", "success");
+            showToast(planId ? "Plan actualizado con éxito" : "Plan creado correctamente", "success");
             renderPlanesList();
         } else {
             console.error("Errores:", data.errors);
             showToast(data.message || 'Error al guardar el plan.', "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión.", "danger");
+    }
+}
+
+/**
+ * Elimina un plan tras confirmación.
+ */
+async function deletePlan(id, nombre) {
+    const seguro = confirm(`¿Eliminar definitivamente el plan "${nombre}"?`);
+    if (!seguro) return;
+
+    try {
+        const response = await fetchAPI(`/plan/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            showToast(`Plan "${nombre}" eliminado.`, "success");
+            renderPlanesList();
+        } else {
+            const data = await response.json();
+            showToast(data.message || "Error al eliminar el plan.", "danger");
         }
     } catch (error) {
         showToast("Error de conexión.", "danger");
