@@ -406,6 +406,58 @@
         </div>
     </template>
 
+    <template id="tpl-sesion-form">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-8 mb-5 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 mb-0">📅 Planificar Nueva Sesión</h2>
+                    <button id="btn-cancelar-sesion" class="btn btn-outline-secondary">Volver</button>
+                </div>
+
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <form id="form-sesion">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="se-nombre" class="form-label fw-bold">Nombre de la Sesión *</label>
+                                    <input type="text" class="form-control" id="se-nombre" required placeholder="Ej: Rodaje zona 2">
+                                </div>
+                                <div class="col-md-6 mt-3 mt-md-0">
+                                    <label for="se-plan" class="form-label fw-bold">Plan de Entrenamiento *</label>
+                                    <select class="form-select" id="se-plan" required>
+                                        <option value="" disabled selected>Cargando planes...</option>
+                                        </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="se-fecha" class="form-label fw-bold">Fecha Programada *</label>
+                                    <input type="date" class="form-control" id="se-fecha" required>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end pb-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="se-completada">
+                                        <label class="form-check-label" for="se-completada">Marcar como Completada</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="se-descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="se-descripcion" rows="3" placeholder="Detalles de la sesión..."></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg" id="btn-guardar-sesion">Guardar Sesión</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -810,7 +810,7 @@ function renderSesionesList() {
     const clone = template.content.cloneNode(true);
 
     clone.getElementById('btn-nueva-sesion').addEventListener('click', () => {
-        showToast("Formulario en la V15", "info");
+        renderSesionForm();
     });
 
     appContainer.appendChild(clone);
@@ -864,7 +864,6 @@ function initIntersectionObserver() {
  * Realiza la petición GET paginada a la API y gestiona el flujo del scroll.
  */
 async function fetchSesionesPaginadas() {
-    // Evitamos peticiones dobles o si ya hemos llegado al final
     if (isFetchingSesiones || !hasMoreSesiones) return;
     
     isFetchingSesiones = true;
@@ -872,48 +871,48 @@ async function fetchSesionesPaginadas() {
     const sentinel = document.getElementById('scroll-sentinel');
     const endMessage = document.getElementById('no-more-sesiones');
 
-    // Mostramos el spinner mientras esperamos a la red (excepto en la primera carga si queremos que sea limpia)
-    if (sesionesOffset > 0 && sentinel) {
+    // 1. Activamos visualmente el centinela mientras pedimos datos al servidor
+    if (sentinel) {
         sentinel.classList.remove('d-none');
+        sentinel.style.opacity = '1'; // Hacemos visible el spinner
     }
 
     try {
-        // Ejecutamos la petición GET con los parámetros de consulta (Query Parameters) exigidos
         const endpoint = `/sesion?offset=${sesionesOffset}&limit=${sesionesLimit}`;
         const response = await fetchAPI(endpoint);
         const sesiones = await response.json();
 
         if (response.ok) {
-            // Caso A: El backend nos devuelve un array vacío. Significa que ya no hay más datos.
+            // Caso A: No hay más datos (Fin absoluto)
             if (sesiones.length === 0) {
                 hasMoreSesiones = false;
-                if (sentinel) sentinel.classList.add('d-none');
+                if (sentinel) sentinel.classList.add('d-none'); // Lo ocultamos definitivamente
                 
-                // Si el offset es 0, es que el usuario no tiene ninguna sesión en total
                 if (sesionesOffset === 0) {
                     const container = document.getElementById('sesiones-container');
-                    const div = document.createElement('div');
-                    div.className = 'col-12 text-center text-muted py-5 mt-4';
-                    div.textContent = 'No tienes ninguna sesión de entrenamiento planificada.';
-                    container.appendChild(div);
+                    container.innerHTML = '<div class="col-12 text-center text-muted py-5 mt-4">No tienes ninguna sesión de entrenamiento planificada.</div>';
                 } else {
-                    // Si ya había cargado algo antes, mostramos el mensaje de "No hay más"
                     if (endMessage) endMessage.classList.remove('d-none');
                 }
             } 
-            // Caso B: Recibimos datos, los pintamos.
+            // Caso B: Recibimos datos
             else {
                 renderSesionesCards(sesiones);
-                
-                // Actualizamos el puntero para el próximo scroll
                 sesionesOffset += sesionesLimit;
 
-                // Optimización: Si el servidor nos devolvió menos sesiones del límite que pedimos, 
-                // matemáticamente sabemos que es la última página.
+                // Si recibimos MENOS de 10 (ej. 4), sabemos matemáticamente que ya no hay más
                 if (sesiones.length < sesionesLimit) {
                     hasMoreSesiones = false;
                     if (sentinel) sentinel.classList.add('d-none');
                     if (endMessage) endMessage.classList.remove('d-none');
+                } else {
+                    // LA MAGIA AQUÍ: Recibimos 10, así que PODRÍA haber más en la BBDD.
+                    // Dejamos el centinela en el DOM para que el Observer pueda chocar con él,
+                    // pero lo hacemos invisible (opacity: 0) para no molestar visualmente.
+                    if (sentinel) {
+                        sentinel.classList.remove('d-none');
+                        sentinel.style.opacity = '0';
+                    }
                 }
             }
         } else {
@@ -925,8 +924,20 @@ async function fetchSesionesPaginadas() {
         showToast("Error de conexión al intentar cargar más datos.", "danger");
         if (sentinel) sentinel.classList.add('d-none');
     } finally {
-        // Liberamos el cerrojo para permitir futuras peticiones
         isFetchingSesiones = false;
+
+        // TRUCO SENIOR: Si tu monitor es muy grande (ej. pantalla 4K), 
+        // 10 tarjetas podrían no llegar a generar scroll vertical. 
+        // Si detectamos que el centinela SIGUE dentro de la pantalla, forzamos otra carga.
+        if (hasMoreSesiones && sentinel) {
+            setTimeout(() => {
+                const rect = sentinel.getBoundingClientRect();
+                if (rect.top < window.innerHeight) {
+                    console.log("Pantalla muy grande detectada. Forzando siguiente lote...");
+                    fetchSesionesPaginadas();
+                }
+            }, 300); // Pequeño retraso para dejar que el navegador repinte el DOM
+        }
     }
 }
 
@@ -990,7 +1001,7 @@ function renderSesionesCards(sesiones) {
         btnEliminar.className = 'btn btn-sm btn-outline-danger';
         btnEliminar.textContent = 'Eliminar';
         btnEliminar.addEventListener('click', () => {
-            showToast(`La eliminación (ID: ${sesion.id}) se programará en la V15`, "warning");
+            deleteSesion(sesion.id, sesion.nombre);
         });
 
         cardFooter.appendChild(btnEliminar);
@@ -1003,6 +1014,125 @@ function renderSesionesCards(sesiones) {
         // Inyectamos la columna en el contenedor principal del grid
         container.appendChild(col);
     });
+}
+
+/**
+ * Renderiza el formulario de creación de sesión y carga los planes disponibles.
+ */
+function renderSesionForm() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-sesion-form');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-cancelar-sesion').addEventListener('click', () => {
+        renderSesionesList();
+    });
+
+    clone.getElementById('form-sesion').addEventListener('submit', handleSesionSubmit);
+    
+    appContainer.appendChild(clone);
+
+    // Disparamos la carga asíncrona de los planes para rellenar el <select>
+    fetchPlanesForSelect();
+}
+
+/**
+ * Obtiene los planes del usuario y los inyecta como opciones en el formulario.
+ */
+async function fetchPlanesForSelect() {
+    const select = document.getElementById('se-plan');
+    if (!select) return;
+
+    try {
+        const response = await fetchAPI('/plan');
+        const planes = await response.json();
+
+        // Vaciamos el select de forma segura
+        select.replaceChildren();
+
+        if (response.ok && Array.isArray(planes) && planes.length > 0) {
+            // Opción por defecto
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.disabled = true;
+            defaultOpt.selected = true;
+            defaultOpt.textContent = "Selecciona un plan...";
+            select.appendChild(defaultOpt);
+
+            // Inyectamos los planes
+            planes.forEach(plan => {
+                const opt = document.createElement('option');
+                opt.value = plan.id;
+                opt.textContent = plan.nombre;
+                select.appendChild(opt);
+            });
+        } else {
+            const opt = document.createElement('option');
+            opt.value = "";
+            opt.disabled = true;
+            opt.textContent = "No tienes planes. Crea uno primero.";
+            select.appendChild(opt);
+            document.getElementById('btn-guardar-sesion').disabled = true;
+        }
+    } catch (error) {
+        showToast("Error al cargar la lista de planes.", "danger");
+    }
+}
+
+/**
+ * Procesa el envío del formulario para crear una sesión.
+ */
+async function handleSesionSubmit(e) {
+    e.preventDefault();
+
+    const payload = {
+        id_plan: parseInt(document.getElementById('se-plan').value),
+        nombre: document.getElementById('se-nombre').value,
+        fecha: document.getElementById('se-fecha').value,
+        descripcion: document.getElementById('se-descripcion').value || null,
+        completada: document.getElementById('se-completada').checked ? 1 : 0
+    };
+
+    try {
+        const response = await fetchAPI('/sesion/crear', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            showToast("Sesión planificada con éxito", "success");
+            renderSesionesList(); // Volvemos a la cuadrícula, que reiniciará el scroll infinito
+        } else {
+            const data = await response.json();
+            showToast(data.message || 'Error al guardar la sesión.', "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión.", "danger");
+    }
+}
+
+/**
+ * Elimina una sesión específica.
+ */
+async function deleteSesion(id, nombre) {
+    const seguro = confirm(`¿Estás seguro de que deseas eliminar la sesión "${nombre}"?`);
+    if (!seguro) return;
+
+    try {
+        const response = await fetchAPI(`/sesion/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            showToast(`Sesión eliminada.`, "success");
+            // Al tener scroll infinito, lo más seguro es recargar la vista desde cero
+            // para que los offsets y el grid no se descuadren visualmente.
+            renderSesionesList(); 
+        } else {
+            const data = await response.json();
+            showToast(data.message || "Error al eliminar la sesión.", "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión.", "danger");
+    }
 }
 
 /* ==========================================
