@@ -259,10 +259,12 @@ function router(view) {
             renderPlanesList();
             break;
         case 'sesiones':
-            renderSesionesList(); // NUEVO: Llamamos a la vista de sesiones
+            renderSesionesList();
+            break;
+        case 'sesion-plan':
+            renderSesionPlanList(); // NUEVO
             break;
         case 'resultados':
-        case 'sesion-plan':
             renderPlaceholder(`Vista en construcción: ${view.toUpperCase()}`);
             break;
         default:
@@ -1133,6 +1135,121 @@ async function deleteSesion(id, nombre) {
     } catch (error) {
         showToast("Error de conexión.", "danger");
     }
+}
+
+/* ==========================================
+ * MÓDULO: SESIÓN-PLAN (RELACIONES)
+ * ========================================== */
+
+function renderSesionPlanList() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-sesion-plan-list');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-asignar-sesion-plan').addEventListener('click', () => {
+        showToast("Formulario de creación masiva en la V17", "info");
+    });
+
+    appContainer.appendChild(clone);
+    fetchSesionPlan();
+}
+
+async function fetchSesionPlan() {
+    try {
+        // Llamamos al endpoint que preparaste en tu backend con ->with(['sesiones'])
+        const response = await fetchAPI('/sesionPlan');
+        const planes = await response.json();
+        renderSesionPlanAccordion(planes);
+    } catch (error) {
+        showToast("Error al obtener las relaciones Sesión-Plan.", "danger");
+    }
+}
+
+function renderSesionPlanAccordion(planes) {
+    const accordion = document.getElementById('accordionSesionPlan');
+    if (!accordion) return;
+    
+    accordion.replaceChildren(); // Limpiamos el loading
+
+    if (!Array.isArray(planes) || planes.length === 0) {
+        const div = document.createElement('div');
+        div.className = 'text-center text-muted py-3';
+        div.textContent = 'No hay planes de entrenamiento registrados.';
+        accordion.appendChild(div);
+        return;
+    }
+
+    planes.forEach((plan, index) => {
+        // 1. Crear el ítem del acordeón
+        const item = document.createElement('div');
+        item.className = 'accordion-item border-bottom mb-2';
+
+        // 2. Crear la cabecera (Header)
+        const header = document.createElement('h2');
+        header.className = 'accordion-header';
+        header.id = `heading-sp-${plan.id}`;
+
+        const button = document.createElement('button');
+        // Solo el primer elemento se abre por defecto
+        button.className = index === 0 ? 'accordion-button fw-bold text-dark' : 'accordion-button collapsed fw-bold text-dark';
+        button.type = 'button';
+        button.setAttribute('data-bs-toggle', 'collapse');
+        button.setAttribute('data-bs-target', `#collapse-sp-${plan.id}`);
+        
+        // Cantidad de sesiones para mostrar en la pestaña
+        const numSesiones = plan.sesiones ? plan.sesiones.length : 0;
+        button.textContent = `📅 Plan: ${plan.nombre} (${numSesiones} sesiones)`;
+
+        header.appendChild(button);
+        item.appendChild(header);
+
+        // 3. Crear el cuerpo colapsable (Body)
+        const collapseDiv = document.createElement('div');
+        collapseDiv.id = `collapse-sp-${plan.id}`;
+        collapseDiv.className = index === 0 ? 'accordion-collapse collapse show' : 'accordion-collapse collapse';
+        collapseDiv.setAttribute('data-bs-parent', '#accordionSesionPlan');
+
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'accordion-body bg-light';
+
+        // 4. Inyectar las sesiones dentro del cuerpo
+        if (numSesiones === 0) {
+            const p = document.createElement('p');
+            p.className = 'text-muted fst-italic mb-0';
+            p.textContent = 'Este plan aún no tiene sesiones asignadas.';
+            bodyDiv.appendChild(p);
+        } else {
+            const listGroup = document.createElement('ul');
+            listGroup.className = 'list-group list-group-flush shadow-sm rounded';
+
+            plan.sesiones.forEach(sesion => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                
+                const spanNombre = document.createElement('span');
+                spanNombre.textContent = `🚴 ${sesion.nombre} `;
+                
+                const smallFecha = document.createElement('small');
+                smallFecha.className = 'text-muted ms-2';
+                smallFecha.textContent = `(${sesion.fecha ? sesion.fecha.split(' ')[0] : 'Sin fecha'})`;
+                spanNombre.appendChild(smallFecha);
+
+                const spanEstado = document.createElement('span');
+                const completada = (sesion.completada == 1 || sesion.completada === true);
+                spanEstado.className = completada ? 'badge bg-success rounded-pill' : 'badge bg-warning text-dark rounded-pill';
+                spanEstado.textContent = completada ? 'Completada' : 'Pendiente';
+
+                li.appendChild(spanNombre);
+                li.appendChild(spanEstado);
+                listGroup.appendChild(li);
+            });
+            bodyDiv.appendChild(listGroup);
+        }
+
+        collapseDiv.appendChild(bodyDiv);
+        item.appendChild(collapseDiv);
+        accordion.appendChild(item);
+    });
 }
 
 /* ==========================================

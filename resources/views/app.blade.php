@@ -458,6 +458,32 @@
         </div>
     </template>
 
+    <template id="tpl-sesion-plan-list">
+        <div class="fade-in pb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">🔗 Relación: Sesiones por Plan</h2>
+                <button id="btn-asignar-sesion-plan" class="btn btn-primary">
+                    + Asignar Masivamente (V17)
+                </button>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        Visualiza de forma estructurada cómo se agrupan tus sesiones dentro de cada plan de entrenamiento.
+                    </p>
+                    
+                    <div class="accordion" id="accordionSesionPlan">
+                        <div class="text-center py-4 text-muted" id="sp-loading">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Cargando relaciones...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
