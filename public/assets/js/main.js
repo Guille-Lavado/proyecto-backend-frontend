@@ -1147,7 +1147,7 @@ function renderSesionPlanList() {
     const clone = template.content.cloneNode(true);
 
     clone.getElementById('btn-asignar-sesion-plan').addEventListener('click', () => {
-        showToast("Formulario de creación masiva en la V17", "info");
+        renderSesionPlanForm();
     });
 
     appContainer.appendChild(clone);
@@ -1250,6 +1250,107 @@ function renderSesionPlanAccordion(planes) {
         item.appendChild(collapseDiv);
         accordion.appendChild(item);
     });
+}
+
+/**
+ * Renderiza el formulario maestro para la creación múltiple.
+ */
+function renderSesionPlanForm() {
+    clearAppContainer();
+    const template = document.getElementById('tpl-sesion-plan-form');
+    const clone = template.content.cloneNode(true);
+
+    clone.getElementById('btn-cancelar-sp').addEventListener('click', () => {
+        renderSesionPlanList();
+    });
+
+    // Evento para añadir una nueva fila dinámica
+    clone.getElementById('btn-add-sesion-row').addEventListener('click', addSesionRow);
+
+    clone.getElementById('form-sesion-plan').addEventListener('submit', handleSesionPlanSubmit);
+
+    appContainer.appendChild(clone);
+
+    // Añadimos una fila por defecto para que no esté vacío al entrar
+    addSesionRow();
+}
+
+/**
+ * Clona el template auxiliar y lo añade al contenedor dinámico.
+ */
+function addSesionRow() {
+    const container = document.getElementById('dynamic-sesiones-container');
+    const template = document.getElementById('tpl-sesion-row');
+    const clone = template.content.cloneNode(true);
+    
+    // Capturamos el nodo raíz de la fila antes de insertarlo
+    const rowNode = clone.querySelector('.session-row');
+    
+    // Le damos vida al botón de "X" para borrar esa fila en concreto
+    clone.querySelector('.btn-remove-row').addEventListener('click', () => {
+        rowNode.remove();
+    });
+
+    container.appendChild(clone);
+}
+
+/**
+ * Procesa el formulario, extrayendo las filas dinámicas y construyendo
+ * el payload JSON anidado que exige nuestro backend.
+ */
+async function handleSesionPlanSubmit(e) {
+    e.preventDefault();
+
+    // 1. Recolectamos todas las filas de sesiones del DOM
+    const sessionRows = document.querySelectorAll('.session-row');
+    
+    if (sessionRows.length === 0) {
+        showToast("Debes añadir al menos una sesión al plan.", "warning");
+        return;
+    }
+
+    const sesionesArray = [];
+    
+    // 2. Iteramos sobre los nodos HTML para extraer sus valores y montar el array
+    sessionRows.forEach(row => {
+        sesionesArray.push({
+            nombre: row.querySelector('.row-nombre').value,
+            fecha: row.querySelector('.row-fecha').value,
+            descripcion: row.querySelector('.row-desc').value || null,
+            completada: 0 // Por defecto al crear un plan futuro
+        });
+    });
+
+    // 3. Montamos el payload maestro con los datos del plan y el array dentro
+    const payload = {
+        id_ciclista: 1, 
+        nombre: document.getElementById('sp-nombre-plan').value,
+        fecha_inicio: document.getElementById('sp-fecha-inicio').value,
+        fecha_fin: document.getElementById('sp-fecha-fin').value,
+        objetivo: document.getElementById('sp-objetivo').value || "", 
+        descripcion: "",
+        activo: 1,
+        sesiones: sesionesArray
+    };
+
+    try {
+        const response = await fetchAPI('/sesionPlan', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast("Plan y sesiones creados masivamente con éxito.", "success");
+            renderSesionPlanList(); // Volvemos al acordeón
+        } else {
+            console.error("Errores:", data.errors);
+            showToast(data.message || 'Error en la validación del servidor.', "danger");
+        }
+    } catch (error) {
+        showToast("Error de conexión al guardar.", "danger");
+    }
 }
 
 /* ==========================================

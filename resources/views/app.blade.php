@@ -463,7 +463,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="h3 mb-0">🔗 Relación: Sesiones por Plan</h2>
                 <button id="btn-asignar-sesion-plan" class="btn btn-primary">
-                    + Asignar Masivamente (V17)
+                    + Asignar Masivamente
                 </button>
             </div>
 
@@ -480,6 +480,74 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-sesion-plan-form">
+        <div class="row justify-content-center fade-in">
+            <div class="col-12 col-lg-10 mb-5 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 mb-0">🚀 Crear Plan y Asignar Sesiones</h2>
+                    <button id="btn-cancelar-sp" class="btn btn-outline-secondary">Volver al listado</button>
+                </div>
+
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <form id="form-sesion-plan">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">1. Datos del Plan</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Nombre del Plan *</label>
+                                    <input type="text" class="form-control" id="sp-nombre-plan" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Fecha Inicio *</label>
+                                    <input type="date" class="form-control" id="sp-fecha-inicio" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Fecha Fin *</label>
+                                    <input type="date" class="form-control" id="sp-fecha-fin" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Objetivo general</label>
+                                <input type="text" class="form-control" id="sp-objetivo">
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                <h5 class="text-success mb-0">2. Sesiones a incluir</h5>
+                                <button type="button" id="btn-add-sesion-row" class="btn btn-sm btn-outline-success">+ Añadir Sesión</button>
+                            </div>
+                            
+                            <div id="dynamic-sesiones-container" class="mb-4">
+                                </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Guardar Plan y Sesiones</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-sesion-row">
+        <div class="row border rounded p-3 mb-2 position-relative bg-light session-row fade-in">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2 btn-remove-row" aria-label="Cerrar"></button>
+            
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Nombre de sesión *</label>
+                <input type="text" class="form-control form-control-sm row-nombre" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Fecha *</label>
+                <input type="date" class="form-control form-control-sm row-fecha" required>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-bold">Descripción / Detalles</label>
+                <input type="text" class="form-control form-control-sm row-desc">
             </div>
         </div>
     </template>
