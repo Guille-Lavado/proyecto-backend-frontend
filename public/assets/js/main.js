@@ -106,7 +106,15 @@ function initApp() {
     }
 }
 
+// Variable global para almacenar nuestro observador
+let sesionesObserver = null;
+
 function clearAppContainer() {
+    // Si hay un observador activo, lo desconectamos antes de cambiar de vista
+    if (sesionesObserver) {
+        sesionesObserver.disconnect();
+        sesionesObserver = null;
+    }
     appContainer.replaceChildren(); 
 }
 
@@ -787,25 +795,102 @@ async function deletePlan(id, nombre) {
  * MÓDULO: SESIONES DE ENTRENAMIENTO Y SCROLL INFINITO
  * ========================================== */
 
+// Variables de estado para la paginación
+let sesionesOffset = 0;
+let sesionesLimit = 10;
+let isFetchingSesiones = false;
+let hasMoreSesiones = true;
+
 /**
- * Renderiza la interfaz principal para listar las sesiones.
- * Prepara el contenedor y el centinela para el scroll infinito.
+ * Renderiza la interfaz principal y reinicia el estado del scroll infinito.
  */
 function renderSesionesList() {
     clearAppContainer();
     const template = document.getElementById('tpl-sesiones-list');
     const clone = template.content.cloneNode(true);
 
-    // Botón para crear nueva sesión (Lógica en V15)
     clone.getElementById('btn-nueva-sesion').addEventListener('click', () => {
-        showToast("Formulario de creación de sesión en desarrollo (V15)", "info");
+        showToast("Formulario en la V15", "info");
     });
 
     appContainer.appendChild(clone);
 
-    // Mensaje temporal para confirmar que la vista carga
-    // En la V13/V14 lo quitaremos e inicializaremos el IntersectionObserver
-    showToast("Interfaz de sesiones cargada. El scroll infinito se activará en la V13.", "info");
+    // 1. Reiniciamos el estado cada vez que entramos a la vista
+    sesionesOffset = 0;
+    isFetchingSesiones = false;
+    hasMoreSesiones = true;
+
+    // 2. Inicializamos el observador que vigilará el final de la página
+    initIntersectionObserver();
+
+    // 3. Hacemos la primera carga forzada (V14)
+    // Por ahora, llamamos a nuestra función simulada
+    fetchSesionesPaginadas();
+}
+
+/**
+ * Configura el IntersectionObserver para vigilar el #scroll-sentinel.
+ */
+function initIntersectionObserver() {
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (!sentinel) return;
+
+    // Opciones del observador
+    const options = {
+        root: null, // null = vigila el viewport (la ventana del navegador)
+        rootMargin: '0px', 
+        threshold: 0.1 // Se dispara cuando el 10% del centinela es visible
+    };
+
+    // Callback que se ejecuta cuando el centinela entra o sale de la pantalla
+    const handleIntersect = (entries) => {
+        const entry = entries[0];
+        
+        // Si el centinela es visible, no estamos ya cargando, y quedan sesiones en la BBDD
+        if (entry.isIntersecting && !isFetchingSesiones && hasMoreSesiones) {
+            console.log("¡Centinela a la vista! Cargando más sesiones...");
+            fetchSesionesPaginadas();
+        }
+    };
+
+    // Instanciamos el observador global
+    sesionesObserver = new IntersectionObserver(handleIntersect, options);
+    
+    // Le decimos que empiece a vigilar nuestro div invisible
+    sesionesObserver.observe(sentinel);
+}
+
+/**
+ * Función puente (Mock) para V13. 
+ * En la V14 aquí haremos el fetch real a la API.
+ */
+async function fetchSesionesPaginadas() {
+    if (isFetchingSesiones || !hasMoreSesiones) return;
+    isFetchingSesiones = true;
+
+    const sentinel = document.getElementById('scroll-sentinel');
+    sentinel.classList.remove('d-none'); // Mostramos el spinner de carga
+
+    // Simulamos un retraso de red para ver el efecto visual
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    showToast(`Scroll detectado. Preparando petición GET /sesion?offset=${sesionesOffset}&limit=${sesionesLimit}`, "info");
+
+    // En la V14 inyectaremos tarjetas aquí. Por ahora, forzamos altura para 
+    // que el centinela baje y podamos probar el scroll
+    const container = document.getElementById('sesiones-container');
+    const dummyDiv = document.createElement('div');
+    dummyDiv.className = 'col-12 p-5 bg-white border rounded mb-3 text-center text-muted';
+    dummyDiv.style.minHeight = '600px'; // Forzamos altura para generar scroll vertical
+    dummyDiv.textContent = `Lote de sesiones cargado (Offset actual: ${sesionesOffset})`;
+    container.appendChild(dummyDiv);
+
+    // Preparamos los punteros para la siguiente página
+    sesionesOffset += sesionesLimit;
+    isFetchingSesiones = false;
+    
+    // Ocultamos el spinner de carga hasta el próximo scroll
+    //sentinel.classList.add('d-none');
 }
 
 /* ==========================================
