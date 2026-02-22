@@ -16,7 +16,21 @@ class PlanController extends Controller
     public function getAll()
     {
         $planes = PlanEntrenamiento::all();
-        return response()->json($planes, 200);
+
+        $res_planes = [];
+        foreach($planes as $plan) {
+            $res_planes[] = [
+                "id" => $plan["id"],
+                "nombre" => $plan["nombre"],
+                "descripcion" => $plan["descripcion"],
+                "fecha_inicio" => $plan["fecha_inicio"],
+                "fecha_fin" => $plan["fecha_fin"],
+                "objetivo" => $plan["objetivoid"],
+                "activo" => $plan["activo"]
+            ];
+        }
+
+        return response()->json($res_planes, 200);
     }
 
     /**
@@ -123,8 +137,34 @@ class PlanController extends Controller
     }
 
     public function getSesionPlan() {
-        $sesiones = PlanEntrenamiento::with(["sesiones"])->get();
-        return response()->json($sesiones, 200);
+        $sesionPlanes = PlanEntrenamiento::with(["sesiones"])->get();
+
+        $res_sesionPlanes = [];
+        foreach($sesionPlanes as $sesionPlan) {
+            $sesiones = [];
+            foreach($sesionPlan["sesiones"] as $sesion) {
+                $sesiones[] = [
+                    "id" => $sesion["id"],
+                    "fecha" => $sesion["fecha"],
+                    "nombre" => $sesion["nombreid"],
+                    "descripcion" => $sesion["descripcion"],
+                    "completada" => $sesion["completada"],
+                ];
+            }
+
+            $res_sesionPlanes[] = [
+                "id" => $sesionPlan["id"],
+                "nombre" => $sesionPlan["nombre"],
+                "descripcion" => $sesionPlan["descripcion"],
+                "fecha_inicio" => $sesionPlan["fecha_inicio"],
+                "fecha_fin" => $sesionPlan["fecha_fin"],
+                "objetivo" => $sesionPlan["objetivoid"],
+                "activo" => $sesionPlan["activo"],
+                "sesiones" => $sesiones
+            ];
+        }
+
+        return response()->json($res_sesionPlanes, 200);
     }
 
     public function crearSesionPlan(Request $request) {

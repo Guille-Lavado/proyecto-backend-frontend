@@ -25,8 +25,19 @@ class SesionController extends Controller
         } else {
             $sesiones = SesionEntrenamiento::all();
         }
+
+        $res_sesiones = [];
+        foreach($sesiones as $sesion) {
+            $res_sesiones[] = [
+                "id" => $sesion["id"],
+                "fecha" => $sesion["fecha"],
+                "nombre" => $sesion["nombreid"],
+                "descripcion" => $sesion["descripcion"],
+                "completada" => $sesion["completada"],
+            ];
+        }
         
-        return response()->json($sesiones, 200);
+        return response()->json($res_sesiones, 200);
     }
 
     /**

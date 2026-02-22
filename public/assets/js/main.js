@@ -486,7 +486,7 @@ async function handleBloqueSubmit(e) {
         btnSubmit.disabled = true;
 
         // Utilizamos nuestro interceptor para enviar la petición con el token
-        const response = await fetchAPI('/bloque/crear', {
+        const response = await fetchAPI('/bloque', {
             method: 'POST',
             body: JSON.stringify(payload)
         });
@@ -582,7 +582,7 @@ async function deleteBloque(id, nombre) {
 
     try {
         // Ejecutamos la petición con el método DELETE a la ruta exigida
-        const response = await fetchAPI(`/bloque/${id}/eliminar`, {
+        const response = await fetchAPI(`/bloque/${id}`, {
             method: 'DELETE'
         });
 
@@ -752,7 +752,7 @@ async function handlePlanSubmit(e, planId = null) {
 
     // Lógica dinámica de endpoints según los requisitos del PDF
     const method = planId ? 'PUT' : 'POST';
-    const endpoint = planId ? `/plan/${planId}` : '/plan/crear';
+    const endpoint = planId ? `/plan/${planId}` : '/plan';
 
     try {
         const response = await fetchAPI(endpoint, {
@@ -1099,7 +1099,7 @@ async function handleSesionSubmit(e) {
     };
 
     try {
-        const response = await fetchAPI('/sesion/crear', {
+        const response = await fetchAPI('/sesion', {
             method: 'POST',
             body: JSON.stringify(payload)
         });
@@ -1583,7 +1583,7 @@ async function handleResultadoSubmit(e) {
     };
 
     try {
-        const response = await fetchAPI('/resultado/crear', { 
+        const response = await fetchAPI('/resultado', { 
             method: 'POST', 
             body: JSON.stringify(payload) 
         });

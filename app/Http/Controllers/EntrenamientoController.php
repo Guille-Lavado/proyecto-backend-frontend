@@ -16,7 +16,30 @@ class EntrenamientoController extends Controller
     {
         $entrenamientos = Entrenamiento::all();
         
-        return response()->json($entrenamientos, 200);
+        $res_entrenamientos = [];
+        foreach($entrenamientos as $entrenamiento) {
+            $res_entrenamientos[] = [
+                "id" => $entrenamiento["id"],
+                "id_ciclista" => $entrenamiento["id_ciclista"],
+                "id_bicicleta" => $entrenamiento["id_bicicleta"],
+                "id_sesion" => $entrenamiento["id_sesion"],
+                "fecha" => $entrenamiento["fecha"],
+                "duracion" => $entrenamiento["duracion"],
+                "kilometros" => $entrenamiento["kilometros"],
+                "recorrido" => $entrenamiento["recorrido"],
+                "pulso_medio" => $entrenamiento["pulso_medio"],
+                "pulso_max" => $entrenamiento["pulso_max"],
+                "potencia_media" => $entrenamiento["potencia_media"],
+                "potencia_normalizada" => $entrenamiento["potencia_normalizada"],
+                "velocidad_media" => $entrenamiento["velocidad_media"],
+                "puntos_estres_tss" => $entrenamiento["puntos_estres_tss"],
+                "factor_intensidad_if" => $entrenamiento["factor_intensidad_if"],
+                "ascenso_metros" => $entrenamiento["ascenso_metros"],
+                "comentario" => $entrenamiento["comentario"],
+            ];
+        }
+
+        return response()->json($res_entrenamientos, 200);
     }
 
     /**
@@ -40,7 +63,7 @@ class EntrenamientoController extends Controller
         $validated = $request->validate([
             'id_ciclista'          => 'required|exists:ciclistas,id',
             'id_bicicleta'         => 'nullable|exists:bicicletas,id',
-            'id_sesion'            => 'nullable|exists:sesiones_entrenamiento,id',
+            'id_sesion'            => 'nullable|exists:sesiones_entrenamientos,id',
             'fecha'                => 'required|date',
             'duracion'             => 'required|integer',
             'kilometros'           => 'required|numeric',
